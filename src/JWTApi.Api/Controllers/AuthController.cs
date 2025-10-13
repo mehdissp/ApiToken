@@ -220,7 +220,7 @@ namespace JWTApi.API.Controllers
             }
 
             // نقاط نویز رنگی
-            for (int i = 0; i < 520; i++)
+            for (int i = 0; i < 900; i++)
             {
                 int x = Rand.Next(width);
                 int y = Rand.Next(height);
