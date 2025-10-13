@@ -62,8 +62,8 @@ namespace JWTApi.Infrastructure.Data
                  .HasForeignKey(p => p.UserId);
                
                 b.HasMany(p => p.UserPackages)
-          .WithOne(t => t.User)
-          .HasForeignKey(t => t.PackageId);
+               .WithOne(t => t.User)
+               .HasForeignKey(t => t.UserId);
 
                 b.HasMany(u => u.Projects)
                  .WithOne(p => p.User)
