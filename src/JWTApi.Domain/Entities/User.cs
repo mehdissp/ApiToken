@@ -1,0 +1,39 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace JWTApi.Domain.Entities
+{
+    public class User
+    {
+        public Guid Id { get; private set; }
+        public string Name { get; set; } = string.Empty;
+        public string Username { get; private set; } = string.Empty;
+        public string Email { get; private set; } = string.Empty;
+        public string PasswordHash { get; private set; } = string.Empty;
+
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public ICollection<Todo> Todos { get; set; } = new List<Todo>();
+        public ICollection<Project> Projects { get; set; } = new List<Project>();
+
+        private User() { }
+
+        public User(string username, string email)
+        {
+            Id = Guid.NewGuid();
+            Username = username;
+            Email = email;
+        }
+
+        public void SetPassword(string hash)
+        {
+            PasswordHash = hash;
+        }
+    }
+}
