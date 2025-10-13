@@ -1,4 +1,5 @@
 ﻿using JWTApi.Api.Response;
+using JWTApi.Api.ViewModels.Project;
 using JWTApi.Application.DTOs;
 using JWTApi.Application.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,7 @@ namespace JWTApi.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+  //  [Authorize]
     public class ProjectController : ControllerBase
     {
         private readonly ProjectService _projectService;
@@ -18,13 +19,23 @@ namespace JWTApi.Api.Controllers
             _projectService = projectService;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterDto dto, CancellationToken cancellationToken)
+        [HttpPost("InsertProject")]
+        public async Task<IActionResult> InsertProject([FromBody] ProjectAddViewModel projectAddViewModel, CancellationToken cancellationToken)
         {
-            await _projectService.RegisterAsync(dto, cancellationToken);
-           
-              ? ResponseApi.Ok(message).ToHttpResponse()
-              : Unauthorized();
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            await _projectService.InsertProject(projectAddViewModel.Name, userId, cancellationToken);
+
+            return ResponseApi.Ok().ToHttpResponse();
+             
+        }
+        [HttpPost("DeleteProject")]
+        public async Task<IActionResult> DeleteProject([FromBody] ProjectDeleteViewModel projectAddViewModel, CancellationToken cancellationToken)
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            await _projectService.DeleteProject(projectAddViewModel.Id, userId, cancellationToken);
+
+            return ResponseApi.Ok().ToHttpResponse();
+
         }
 
 

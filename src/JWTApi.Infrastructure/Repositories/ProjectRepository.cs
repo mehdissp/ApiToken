@@ -21,25 +21,32 @@ namespace JWTApi.Infrastructure.Repositories
         }
         public async Task AddAsync(string name,string userId, CancellationToken cancellationToken)
         {
-            Project project = new Project;
+            Project project = new Project();
             project.Name = name;
-            project.UserId = userId;
+            project.UserId = Guid.Parse(userId);
             await _context.AddAsync(project,cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteAsync(int id, CancellationToken cancellationToken)
+        public async Task DeleteAsync(int projectId, CancellationToken cancellationToken)
         {
-            var checkTodo = await _context.Todos.AnyAsync(s => s.ProjectId == id,cancellationToken);
-            if (!checkTodo)
-            {
-                var project =await GetByProjectIdAsync(id,cancellationToken);
-                _context.Remove(project);
-            }
-            else
-            {
+            // گرفتن پروژه به همراه بررسی وجود تو دوها
+            var project = await _context.Projects
+                .Include(p => p.Todos)
+                .FirstOrDefaultAsync(p => p.Id == projectId, cancellationToken);
+
+            if (project == null)
+                throw new RestBasedException(ApiErrorCodeMessage.Error_NotFound);
+
+            if (project.Todos != null && project.Todos.Any())
                 throw new RestBasedException(ApiErrorCodeMessage.Error_Refrence);
-            }
+
+            // حذف پروژه
+            _context.Projects.Remove(project);
+
+            await _context.SaveChangesAsync(cancellationToken);
         }
+
 
         public async Task<Project?> GetByProjectIdAsync(int projectId, CancellationToken cancellationToken)
         {

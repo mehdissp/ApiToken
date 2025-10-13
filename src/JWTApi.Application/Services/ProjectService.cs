@@ -15,10 +15,18 @@ namespace JWTApi.Application.Services
             _projectRepository = projectRepository;
         }
 
-        public async Task InsertProject(string name, string userId, , CancellationToken cancellationToken)
+        public async Task InsertProject(string name, string userId, CancellationToken cancellationToken)
         {
 
              await _projectRepository.AddAsync(name, userId, cancellationToken);
+             
         }
+        public async Task DeleteProject(int id ,string userId, CancellationToken cancellationToken)
+        {
+            await _projectRepository.DeleteAsync(id, cancellationToken);
+        }
+
+
+
     }
 }

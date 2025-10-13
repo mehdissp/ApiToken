@@ -22,8 +22,10 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 // DI
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IPasswordHasher<User>, Microsoft.AspNetCore.Identity.PasswordHasher<User>>();
 builder.Services.Configure<SecurityOptions>(builder.Configuration.GetSection("Security"));
 
@@ -77,8 +79,10 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCustomRateLimiter();
+app.UseCustomExceptionHandler();
 app.UseMiddleware<LoginRateLimitMiddleware>();
 app.UseMiddleware<SecurityMiddleware>();
 app.UseMiddleware<MenuPermissionMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapControllers();
 app.Run();

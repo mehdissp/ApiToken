@@ -22,6 +22,7 @@ namespace JWTApi.Infrastructure.Data
         public DbSet<RoleMenu> RoleMenus { get; set; }
         public DbSet<LoginAttempt> LoginAttempts { get; set; }
         public DbSet<IpLock> IpLocks { get; set; }
+        public DbSet<Package> Packages { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -56,7 +57,13 @@ namespace JWTApi.Infrastructure.Data
                  .WithOne(t => t.User)
                  .HasForeignKey(t => t.UserId);
 
-
+                b.HasMany(u => u.ExtraProjects)
+                 .WithOne(p => p.User)
+                 .HasForeignKey(p => p.UserId);
+               
+                b.HasMany(p => p.UserPackages)
+          .WithOne(t => t.User)
+          .HasForeignKey(t => t.PackageId);
 
                 b.HasMany(u => u.Projects)
                  .WithOne(p => p.User)
@@ -74,6 +81,37 @@ namespace JWTApi.Infrastructure.Data
                 b.HasMany(p => p.Todos)
                  .WithOne(t => t.Project)
                  .HasForeignKey(t => t.ProjectId);
+
+            });
+            // ---------------- Package ----------------
+            modelBuilder.Entity<Package>(b =>
+            {
+                b.HasKey(p => p.Id);
+                b.Property(p => p.Name).HasMaxLength(200).IsRequired();
+                b.Property(s=>s.MaxProjects).IsRequired();
+                b.Property(s => s.MaxUsers).IsRequired();
+                b.Property(p => p.CreatedAt).HasDefaultValueSql("GETDATE()");
+
+                b.HasMany(p => p.UserPackages)
+                 .WithOne(t => t.Package)
+                 .HasForeignKey(t => t.PackageId);
+
+            });
+            // ---------------- UserPackage ----------------
+            modelBuilder.Entity<UserPackage>(b =>
+            {
+                b.HasKey(p => p.Id);
+                b.Property(p => p.CreatedAt).HasDefaultValueSql("GETDATE()");
+
+
+            });
+
+            // ---------------- ExtraProject ----------------
+            modelBuilder.Entity<ExtraProject>(b =>
+            {
+                b.HasKey(p => p.Id);
+                b.Property(p => p.CreatedAt).HasDefaultValueSql("GETDATE()");
+
 
             });
 

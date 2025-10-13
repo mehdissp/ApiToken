@@ -21,6 +21,8 @@ namespace JWTApi.Domain.Entities
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<Todo> Todos { get; set; } = new List<Todo>();
         public ICollection<Project> Projects { get; set; } = new List<Project>();
+        public ICollection<ExtraProject> ExtraProjects { get; set; } = new List<ExtraProject>();
+        public ICollection<UserPackage> UserPackages { get; set; } = new List<UserPackage>();
 
         private User() { }
 
