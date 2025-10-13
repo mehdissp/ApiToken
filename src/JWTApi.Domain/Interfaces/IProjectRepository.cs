@@ -9,7 +9,7 @@ namespace JWTApi.Domain.Interfaces
 {
     public interface IProjectRepository
     {
-        Task AddAsync(Project project, CancellationToken cancellationToken);
+        Task AddAsync(string name,string userId, CancellationToken cancellationToken);
 
         Task DeleteAsync(int id, CancellationToken cancellationToken);
         Task<Project?> GetByProjectIdAsync(int projectId, CancellationToken cancellationToken);

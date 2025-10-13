@@ -19,8 +19,11 @@ namespace JWTApi.Infrastructure.Repositories
         {
             _context = context;
         }
-        public async Task AddAsync(Project project, CancellationToken cancellationToken)
+        public async Task AddAsync(string name,string userId, CancellationToken cancellationToken)
         {
+            Project project = new Project;
+            project.Name = name;
+            project.UserId = userId;
             await _context.AddAsync(project,cancellationToken);
         }
 
