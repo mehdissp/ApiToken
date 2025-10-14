@@ -23,6 +23,9 @@ namespace JWTApi.Infrastructure.Data
         public DbSet<LoginAttempt> LoginAttempts { get; set; }
         public DbSet<IpLock> IpLocks { get; set; }
         public DbSet<Package> Packages { get; set; }
+        public DbSet<UserPackage> UserPackages { get; set; }
+        public DbSet<ExtraProject> ExtraProjects { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

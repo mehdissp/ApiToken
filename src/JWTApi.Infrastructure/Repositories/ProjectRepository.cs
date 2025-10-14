@@ -21,6 +21,25 @@ namespace JWTApi.Infrastructure.Repositories
         }
         public async Task AddAsync(string name,string userId, CancellationToken cancellationToken)
         {
+            var currentProjects = await _context.Projects.CountAsync(p => p.UserId.ToString() == userId, cancellationToken);
+
+            // ۲. مجموع پروژه‌های مجاز از پکیج‌ها
+            var totalFromPackages = await _context.UserPackages
+                .Where(up => up.UserId.ToString() == userId)
+                .Include(up => up.Package)
+                .SumAsync(up => (int?)up.Package.MaxProjects) ?? 0;
+
+            // ۳. مجموع پروژه‌های خرید اضافه
+            var totalExtra = await _context.ExtraProjects
+                .Where(ep => ep.UserId.ToString() == userId)
+                .SumAsync(ep => (int?)ep.CountProject) ?? 0;
+            var totalAllowed = totalFromPackages + totalExtra;
+            // ۴. بررسی محدودیت
+            if (currentProjects >= totalAllowed)
+            {
+                throw new RestBasedException("شما به حداکثر تعداد پروژه مجاز خود رسیده‌اید.", 403);
+            }
+
             Project project = new Project();
             project.Name = name;
             project.UserId = Guid.Parse(userId);

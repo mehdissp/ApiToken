@@ -59,22 +59,22 @@ namespace JWTApi.Infrastructure.Services
         new Claim(ClaimTypes.Name, user.Username)
     };
             //// اضافه کردن نقش‌ها و دسترسی‌ها
-            //foreach (var role in user.UserRoles.Select(ur => ur.Role))
-            //{
-            //    claims.Add(new Claim(ClaimTypes.Role, role.Name));
+            foreach (var role in user.UserRoles.Select(ur => ur.Role))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role.Name));
 
-            //    foreach (var perm in role.RolePermissions.Select(rp => rp.Permission))
-            //    {
-            //        claims.Add(new Claim("permission", perm.Code));
-            //    }
-            //}
+                //foreach (var perm in role.RolePermissions.Select(rp => rp.Permission))
+                //{
+                //    claims.Add(new Claim("permission", perm.Code));
+                //}
+            }
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
             // زمان انقضا
-            var expires = DateTime.UtcNow.AddMinutes(30);
+            var expires = DateTime.Now.AddMinutes(30);
 
     var token = new JwtSecurityToken(
         issuer: jwt["Issuer"],
