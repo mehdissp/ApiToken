@@ -101,67 +101,26 @@ namespace JWTApi.API.Controllers
               ResponseApi.Ok(user).ToHttpResponse();
 
         }
-        //[HttpGet("captcha")]
-        //public IActionResult GetCaptcha()
-        //{
-        //    //var randomText = Path.GetRandomFileName().Replace(".", "").Substring(0, 5);
-        //    //var captchaId = Guid.NewGuid().ToString();
 
-        //    //// ذخیره در حافظه موقت
-        //    //_memoryCache.Set(captchaId, randomText, TimeSpan.FromMinutes(2));
+        [HttpGet("GetMenusForUi")]
+        [Authorize] // فقط کاربر با توکن معتبر می‌تواند به این دسترسی داشته باشد
+        public async Task<IActionResult> GetMenusForUi(CancellationToken cancellationToken)
+        {
+            // گرفتن UserId از Claim توکن
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var test = User.Claims;
+            if (userId == null)
+                return Unauthorized();
 
-        //    //using var bmp = new Bitmap(120, 40);
-        //    //using var g = Graphics.FromImage(bmp);
-        //    //g.Clear(Color.White);
-        //    //g.DrawString(randomText, new System.Drawing.Font("Arial", 20, FontStyle.Bold), Brushes.Black, 10, 5);
+            var user = await _authService.GetUserMenuPermissionsForUiAsync(userId, cancellationToken);
+            if (user == null)
+                return NotFound();
 
-        //    //using var ms = new MemoryStream();
-        //    //bmp.Save(ms, ImageFormat.Png);
+            return
+              ResponseApi.Ok(user).ToHttpResponse();
 
-        //    ////return File(ms.ToArray(), "image/png", captchaId);
-        //    //return File(ms.ToArray(), "image/png", $"{captchaId}.png");
-        //    // تولید عدد ۵ رقمی تصادفی
-        //    var randomNumber = new Random().Next(10000, 99999).ToString();
-        //    var captchaId = Guid.NewGuid().ToString();
-
-        //    // ذخیره در حافظه موقت
-        //    _memoryCache.Set(captchaId, randomNumber, TimeSpan.FromMinutes(2));
-
-        //    // ایجاد تصویر
-        //    using var bmp = new Bitmap(120, 40);
-        //    using var g = Graphics.FromImage(bmp);
-        //    g.Clear(Color.White);
-
-        //    // کشیدن عدد روی تصویر
-        //    g.DrawString(randomNumber, new System.Drawing.Font("Arial", 20, FontStyle.Bold), Brushes.Black, 10, 5);
-
-        //    using var ms = new MemoryStream();
-        //    bmp.Save(ms, ImageFormat.Png);
-
-        //    // بازگرداندن تصویر
-        //    return File(ms.ToArray(), "image/png");
-        //}
-
-        //[HttpGet("captcha")]
-        //public IActionResult GetCaptcha()
-        //{
-        //    var randomNumber = new Random().Next(10000, 99999).ToString();
-        //    var captchaId = Guid.NewGuid().ToString();
-
-        //    _memoryCache.Set(captchaId, randomNumber, TimeSpan.FromMinutes(2));
-
-        //    using var bmp = new Bitmap(120, 40);
-        //    using var g = Graphics.FromImage(bmp);
-        //    g.Clear(Color.White);
-        //    g.DrawString(randomNumber, new System.Drawing.Font("Arial", 20, FontStyle.Bold), Brushes.Black, 10, 5);
-
-        //    using var ms = new MemoryStream();
-        //    bmp.Save(ms, ImageFormat.Png);
-        //    var base64 = Convert.ToBase64String(ms.ToArray());
-        //    var dataUrl = $"data:image/png;base64,{base64}";
-
-        //    return Ok(new { captchaId, image = dataUrl });
-        //}
+        }
+       
         [HttpGet("captcha")]
         public IActionResult GetCaptcha()
         {

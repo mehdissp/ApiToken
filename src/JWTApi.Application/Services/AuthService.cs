@@ -127,8 +127,11 @@ namespace JWTApi.Application.Services
             return await _userRepo.GetUserMenuPermissionsAsync(userId, cancellationToken);
         }
 
-
-
+        public async Task<List<MenuUi>> GetUserMenuPermissionsForUiAsync(string userId, CancellationToken cancellationToken)
+        {
+            return await _userRepo.GetUserMenuPermissionsForUiAsync(userId, cancellationToken);
+        }
+        
     }
 
 

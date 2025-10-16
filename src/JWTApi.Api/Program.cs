@@ -47,6 +47,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew=TimeSpan.Zero
         };
     });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // آدرس React app
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 // Controllers & Swagger
 builder.Services.AddControllers();
@@ -71,17 +81,18 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseApiSecurity();
-
+app.UseCors("AllowReactApp");
 //app.UseRateLimiter();
 // ثبت IMemoryCache
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
+app.UseStaticFiles();
 app.UseAuthorization();
-app.UseCustomRateLimiter();
+//app.UseCustomRateLimiter();
 app.UseCustomExceptionHandler();
-app.UseMiddleware<LoginRateLimitMiddleware>();
-app.UseMiddleware<SecurityMiddleware>();
+//app.UseMiddleware<RateLimitMiddleware>();
+//app.UseMiddleware<SecurityMiddleware>();
 app.UseMiddleware<MenuPermissionMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapControllers();

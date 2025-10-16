@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using JWTApi.Domain.Entities;
+using System.Reflection.Metadata;
 
 namespace JWTApi.Infrastructure.Data
 {
@@ -25,10 +26,13 @@ namespace JWTApi.Infrastructure.Data
         public DbSet<Package> Packages { get; set; }
         public DbSet<UserPackage> UserPackages { get; set; }
         public DbSet<ExtraProject> ExtraProjects { get; set; }
-
+        public DbSet<Attachment> Attachments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Attachment>()
+    .HasKey(d => d.Id);
+
             modelBuilder.Entity<UserRole>().HasKey(x => new { x.UserId, x.RoleId });
             modelBuilder.Entity<RolePermission>().HasKey(x => new { x.RoleId, x.PermissionId });
             modelBuilder.Entity<LoginAttempt>(b =>

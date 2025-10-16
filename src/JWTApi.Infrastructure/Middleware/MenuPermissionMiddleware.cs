@@ -19,7 +19,7 @@ public class MenuPermissionMiddleware
     {
         // مسیرهای عمومی (public) رو بدون چک کردن اجازه عبور بده
         var path = context.Request.Path.Value?.ToLower() ?? "";
-        var publicPaths = new[] { "/api/auth/login", "/api/auth/register", "/swagger" , "/api/auth/captcha", "/api/auth/verify-captcha" };
+        var publicPaths = new[] { "/api/auth/login", "/api/auth/register", "/swagger" , "/api/auth/captcha", "/api/auth/verify-captcha", "/api/UserProfile/upload-photo" };
         if (publicPaths.Any(p => path.StartsWith(p)))
         {
             await _next(context);

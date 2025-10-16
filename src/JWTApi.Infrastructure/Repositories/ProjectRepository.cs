@@ -50,6 +50,7 @@ namespace JWTApi.Infrastructure.Repositories
         public async Task DeleteAsync(int projectId, CancellationToken cancellationToken)
         {
             // گرفتن پروژه به همراه بررسی وجود تو دوها
+            throw new RestBasedException(ApiErrorCodeMessage.Error_Refrence);
             var project = await _context.Projects
                 .Include(p => p.Todos)
                 .FirstOrDefaultAsync(p => p.Id == projectId, cancellationToken);
@@ -72,6 +73,45 @@ namespace JWTApi.Infrastructure.Repositories
             return await _context.Projects.FindAsync(projectId, cancellationToken);
         }
 
-       
+        public async Task<(List<ProjectWithPackageInfoDto> Items, int TotalCount, int TotalPages)> GetProjectsWithPackageInfo(
+            string userId,
+            int pageNumber,
+            int pageSize,
+            CancellationToken cancellationToken)
+        {
+            var skip = (pageNumber - 1) * pageSize;
+
+            var baseQuery = _context.Projects
+                .Where(s => s.UserId.ToString() == userId)
+                .Include(s => s.User)
+                    .ThenInclude(u => u.UserPackages)
+                    .ThenInclude(up => up.Package);
+
+            var totalCount = await baseQuery.CountAsync(cancellationToken);
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            var query = baseQuery
+                .OrderByDescending(s => s.CreatedAt)
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(s => new
+                {
+                    Project = s,
+                    MaxProjects = s.User.UserPackages.FirstOrDefault().Package.MaxProjects
+                });
+
+            var result = await query.ToListAsync(cancellationToken);
+
+            var items = result.Select((item, index) => new ProjectWithPackageInfoDto
+            {
+                Id=item.Project.Id,
+                Name = item.Project.Name,
+                CreatedAt = item.Project.CreatedAt,
+                MaxProjects = item.MaxProjects,
+                RowNum = skip + index + 1
+            }).ToList();
+
+            return (items, totalCount, totalPages);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using JWTApi.Api.Response;
+using JWTApi.Api.ViewModels;
 using JWTApi.Api.ViewModels.Project;
 using JWTApi.Application.DTOs;
 using JWTApi.Application.Services;
@@ -38,6 +39,21 @@ namespace JWTApi.Api.Controllers
 
         }
 
+
+        [HttpPost("GetProject")]
+        public async Task<IActionResult> GetProject([FromBody]PageSizeViewModel pageSize, CancellationToken cancellationToken)
+        {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+                var result = await _projectService.GetProjectsAsync(userId, pageSize.PageNumber, pageSize.PageSize, cancellationToken);
+                var response = new
+                {
+                    Items = result.Items,
+                    TotalCount = result.TotalCount,
+                    TotalPages = result.TotalPages
+                };
+                return ResponseApi.Ok(response).ToHttpResponse();
+        
+        }
 
     }
 }

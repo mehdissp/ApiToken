@@ -18,5 +18,6 @@ namespace JWTApi.Domain.Interfaces
         Task<List<MenuPermissionDto>> GetUserMenuPermissionsAsync(string userId,CancellationToken cancellationToken);
          Task AddLoginAttemptAsync(LoginAttempt loginAttempt, CancellationToken cancellationToken);
         Task CheckAndLockIp(string? ip);
+        Task<List<MenuUi>> GetUserMenuPermissionsForUiAsync(string userId, CancellationToken cancellationToken);
     }
 }

@@ -1,4 +1,6 @@
-﻿using JWTApi.Domain.Interfaces;
+﻿using JWTApi.Domain.Dtos;
+using JWTApi.Domain.Entities;
+using JWTApi.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +28,11 @@ namespace JWTApi.Application.Services
             await _projectRepository.DeleteAsync(id, cancellationToken);
         }
 
-
+        public async Task<(List<ProjectWithPackageInfoDto> Items, int TotalCount, int TotalPages)> GetProjectsAsync(string userId ,  int pageNumber,
+             int pageSize, CancellationToken cancellationToken)
+        {
+            return await _projectRepository.GetProjectsWithPackageInfo(userId,pageNumber,pageSize, cancellationToken);
+        }
 
     }
 }

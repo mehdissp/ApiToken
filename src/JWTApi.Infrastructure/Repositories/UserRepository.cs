@@ -58,10 +58,34 @@ namespace JWTApi.Infrastructure.Repositories
                     MenuName = menu.Name,
                     Url = menu.Url,
                     Permissions = _context.RoleMenus
-    .Where(rmp => userRoleIds.Contains(rmp.RoleId) && rmp.MenuId == menu.Id)
+    .Where(rmp => userRoleIds.Contains(rmp.RoleId) && rmp.MenuId == menu.Id )
     .Select(rmp => rmp.Permission.Name)
     .Distinct()
     .ToList()
+
+                })
+                .ToListAsync(cancellationToken);
+
+            return menuPermissions;
+        }
+
+
+        public async Task<List<MenuUi>> GetUserMenuPermissionsForUiAsync(string userId, CancellationToken cancellationToken)
+        {
+            // نقش‌های کاربر
+            var userRoleIds = await _context.UserRoles
+                .Where(ur => ur.UserId.ToString() == userId)
+                .Select(ur => ur.RoleId)
+                .ToListAsync(cancellationToken);
+
+            // گرفتن منوها و دسترسی‌ها
+            var menuPermissions = await _context.Menus.Where(s=>s.IsMenu==true)
+                .Select(menu => new MenuUi
+                {
+                    Id = menu.Id,
+                    Path = menu.Path,
+                    Label = menu.Label,
+                    Icon = menu.Icon,
 
                 })
                 .ToListAsync(cancellationToken);
