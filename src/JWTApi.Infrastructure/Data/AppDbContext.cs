@@ -11,6 +11,9 @@ namespace JWTApi.Infrastructure.Data
 
         public DbSet<User> Users => Set<User>();
         public DbSet<Todo> Todos => Set<Todo>();
+        public DbSet<TodoStatus> TodoStatuses => Set<TodoStatus>();
+
+        
         public DbSet<TodoTag> TodoTags => Set<TodoTag>();
         public DbSet<Project> Projects => Set<Project>();
         public DbSet<Reminder> Reminders => Set<Reminder>();
@@ -58,7 +61,7 @@ namespace JWTApi.Infrastructure.Data
                 b.Property(u => u.Name).HasMaxLength(100).IsRequired();
                 b.Property(u => u.Email).HasMaxLength(200).IsRequired();
                 b.Property(u => u.PasswordHash).IsRequired();
-                b.Property(u => u.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+                b.Property(u => u.CreatedAt).HasDefaultValueSql("GETDATE()");
 
                 b.HasMany(u => u.Todos)
                  .WithOne(t => t.User)
@@ -83,11 +86,15 @@ namespace JWTApi.Infrastructure.Data
             {
                 b.HasKey(p => p.Id);
                 b.Property(p => p.Name).HasMaxLength(200).IsRequired();
-                b.Property(p => p.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+                b.Property(p => p.CreatedAt).HasDefaultValueSql("GETDATE()");
 
-                b.HasMany(p => p.Todos)
-                 .WithOne(t => t.Project)
-                 .HasForeignKey(t => t.ProjectId);
+                //b.HasMany(p => p.Todos)
+                // .WithOne(t => t.Project)
+                // .HasForeignKey(t => t.ProjectId);
+
+                b.HasMany(p => p.TodoStatuses)
+              .WithOne(t => t.Project)
+              .HasForeignKey(t => t.ProjectId);
 
             });
             // ---------------- Package ----------------
@@ -130,7 +137,16 @@ namespace JWTApi.Infrastructure.Data
                 b.Property(t => t.Description).HasMaxLength(1000);
 
 
-                b.Property(t => t.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+                b.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()");
+            });
+
+            // ---------------- TodoStatus ----------------
+            modelBuilder.Entity<TodoStatus>(b =>
+            {
+                b.HasKey(t => t.Id);
+                b.Property(t => t.Name).HasMaxLength(75).IsRequired();
+                b.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()");
+
             });
 
             // ---------------- Tag ----------------

@@ -50,7 +50,7 @@ namespace JWTApi.Infrastructure.Repositories
         public async Task DeleteAsync(int projectId, CancellationToken cancellationToken)
         {
             // گرفتن پروژه به همراه بررسی وجود تو دوها
-            throw new RestBasedException(ApiErrorCodeMessage.Error_Refrence);
+
             var project = await _context.Projects
                 .Include(p => p.Todos)
                 .FirstOrDefaultAsync(p => p.Id == projectId, cancellationToken);
@@ -62,7 +62,8 @@ namespace JWTApi.Infrastructure.Repositories
                 throw new RestBasedException(ApiErrorCodeMessage.Error_Refrence);
 
             // حذف پروژه
-            _context.Projects.Remove(project);
+            //_context.Projects.Remove(project);
+            project.IsDeleted = true;
 
             await _context.SaveChangesAsync(cancellationToken);
         }
@@ -82,7 +83,7 @@ namespace JWTApi.Infrastructure.Repositories
             var skip = (pageNumber - 1) * pageSize;
 
             var baseQuery = _context.Projects
-                .Where(s => s.UserId.ToString() == userId)
+                .Where(s => s.UserId.ToString() == userId && s.IsDeleted==false)
                 .Include(s => s.User)
                     .ThenInclude(u => u.UserPackages)
                     .ThenInclude(up => up.Package);

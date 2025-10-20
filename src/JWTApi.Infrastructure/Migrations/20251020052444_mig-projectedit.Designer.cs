@@ -4,6 +4,7 @@ using JWTApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JWTApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251020052444_mig-projectedit")]
+    partial class migprojectedit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -395,7 +398,7 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<int>("StatusId")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -413,44 +416,6 @@ namespace JWTApi.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Todos");
-                });
-
-            modelBuilder.Entity("JWTApi.Domain.Entities.TodoStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Color")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(75)
-                        .HasColumnType("nvarchar(75)");
-
-                    b.Property<int?>("OrderNum")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("TodoStatuses");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.TodoTag", b =>
@@ -645,7 +610,7 @@ namespace JWTApi.Infrastructure.Migrations
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Todo", b =>
                 {
-                    b.HasOne("JWTApi.Domain.Entities.Project", null)
+                    b.HasOne("JWTApi.Domain.Entities.Project", "Project")
                         .WithMany("Todos")
                         .HasForeignKey("ProjectId");
 
@@ -655,18 +620,9 @@ namespace JWTApi.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("JWTApi.Domain.Entities.TodoStatus", b =>
-                {
-                    b.HasOne("JWTApi.Domain.Entities.Project", "Project")
-                        .WithMany("TodoStatuses")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Project");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.TodoTag", b =>
@@ -747,8 +703,6 @@ namespace JWTApi.Infrastructure.Migrations
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Project", b =>
                 {
-                    b.Navigation("TodoStatuses");
-
                     b.Navigation("Todos");
                 });
 
