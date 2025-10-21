@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using JWTApi.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using JWTApi.Domain.Dtos;
+using JWTApi.Infrastructure.Exceptions;
 
 namespace JWTApi.Infrastructure.Repositories
 {
@@ -34,6 +35,30 @@ namespace JWTApi.Infrastructure.Repositories
         {
           await  _context.Users.AddAsync(user,cancellationToken );
             await _context.SaveChangesAsync();
+        }
+
+        public async Task AddUserWithAnotherUsers(User user,string userId,CancellationToken cancellationToken)
+        {
+            var currentProjects = await _context.Users.CountAsync(p => p.UserId.ToString() == userId, cancellationToken);
+            // ۲. مجموع پروژه‌های مجاز از پکیج‌ها
+            var totalFromPackages = await _context.UserPackages
+                .Where(up => up.UserId.ToString() == userId)
+                .Include(up => up.Package)
+                .SumAsync(up => (int?)up.Package.MaxUsers) ?? 0;
+
+            // ۳. مجموع پروژه‌های خرید اضافه
+            var totalExtra = await _context.ExtraProjects
+                .Where(ep => ep.UserId.ToString() == userId)
+                .SumAsync(ep => (int?)ep.CountUsers) ?? 0;
+            var totalAllowed = totalFromPackages + totalExtra;
+
+            // ۴. بررسی محدودیت
+            if (currentProjects >= totalAllowed)
+            {
+                throw new RestBasedException("شما به حداکثر تعداد کاربر مجاز خود رسیده‌اید.", 500);
+            }
+            user.UserId = Guid.Parse(userId);
+            await _context.AddAsync(user, cancellationToken);
         }
 
         public async Task UpdateAsync(User user)
@@ -126,5 +151,57 @@ namespace JWTApi.Infrastructure.Repositories
         }
 
 
+
+        //public async Task<List<User>> GetUsersAsync(string userId, int PageNumber, int PageSize, CancellationToken cancellationToken)
+        //{
+        //    return await _context.Users.Where(s => s.UserId.ToString() == userId).ToListAsync(cancellationToken);
+        //}
+        public async Task<PagedResult<User>> GetUsersAsync(string userId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        {
+            var query = _context.Users.Include(S=>S.UserPackages).ThenInclude(s=>s.Package).Where(s => s.UserId.ToString() == userId);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+
+
+            var maxUsers = await _context.Users
+    .Where(u => u.Id.ToString() ==userId)
+    .SelectMany(u => u.UserPackages)
+    .Select(up => up.Package.MaxUsers)
+    .FirstOrDefaultAsync(cancellationToken);
+
+
+            return new PagedResult<User>
+            {
+                Items = users,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                Max= maxUsers
+            };
+        }
+
+
+        public async Task<bool> checkUserNameDublicated(string userName,CancellationToken cancellationToken)
+        {
+            return await _context.Users.AnyAsync(s => s.Username == userName);
+        }
+        public async Task<bool> checkMobileDublicated(string mobileNumber, CancellationToken cancellationToken)
+        {
+            return await _context.Users.AnyAsync(s => s.MobileNumber == mobileNumber);
+        }
+        public async Task<bool> checkUserNameDublicatedUpdate(string userName,string userId, CancellationToken cancellationToken)
+        {
+            return await _context.Users.AnyAsync(s => s.Username == userName && s.Id.ToString()!=userId);
+        }
+        public async Task<bool> checkMobileDublicatedUpdate(string mobileNumber, string userId, CancellationToken cancellationToken)
+        {
+            return await _context.Users.AnyAsync(s => s.MobileNumber == mobileNumber && s.Id.ToString() != userId);
+        }
     }
 }

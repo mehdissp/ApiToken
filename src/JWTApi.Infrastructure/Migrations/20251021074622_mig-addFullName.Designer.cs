@@ -4,6 +4,7 @@ using JWTApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JWTApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251021074622_mig-addFullName")]
+    partial class migaddFullName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,8 +69,6 @@ namespace JWTApi.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TodoId");
 
                     b.ToTable("Comment");
                 });
@@ -409,6 +410,9 @@ namespace JWTApi.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CommentId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
@@ -442,6 +446,8 @@ namespace JWTApi.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
 
                     b.HasIndex("ProjectId");
 
@@ -514,6 +520,9 @@ namespace JWTApi.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("CommentId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -563,6 +572,8 @@ namespace JWTApi.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CommentId");
+
                     b.ToTable("Users");
                 });
 
@@ -610,17 +621,6 @@ namespace JWTApi.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles");
-                });
-
-            modelBuilder.Entity("JWTApi.Domain.Entities.Comment", b =>
-                {
-                    b.HasOne("JWTApi.Domain.Entities.Todo", "Todo")
-                        .WithMany()
-                        .HasForeignKey("TodoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Todo");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.ExtraProject", b =>
@@ -714,6 +714,10 @@ namespace JWTApi.Infrastructure.Migrations
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Todo", b =>
                 {
+                    b.HasOne("JWTApi.Domain.Entities.Comment", null)
+                        .WithMany("Todos")
+                        .HasForeignKey("CommentId");
+
                     b.HasOne("JWTApi.Domain.Entities.Project", null)
                         .WithMany("Todos")
                         .HasForeignKey("ProjectId");
@@ -761,6 +765,13 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Navigation("Todo");
                 });
 
+            modelBuilder.Entity("JWTApi.Domain.Entities.User", b =>
+                {
+                    b.HasOne("JWTApi.Domain.Entities.Comment", null)
+                        .WithMany("Users")
+                        .HasForeignKey("CommentId");
+                });
+
             modelBuilder.Entity("JWTApi.Domain.Entities.UserPackage", b =>
                 {
                     b.HasOne("JWTApi.Domain.Entities.Package", "Package")
@@ -797,6 +808,13 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.Comment", b =>
+                {
+                    b.Navigation("Todos");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Menu", b =>

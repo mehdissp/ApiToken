@@ -102,6 +102,7 @@ namespace JWTApi.Infrastructure.Repositories
                 });
 
             var result = await query.ToListAsync(cancellationToken);
+            
 
             var items = result.Select((item, index) => new ProjectWithPackageInfoDto
             {

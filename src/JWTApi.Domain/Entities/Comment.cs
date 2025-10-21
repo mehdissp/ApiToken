@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace JWTApi.Domain.Entities
+{
+   public class Comment
+    {
+        public int Id { get; set; }
+        public int TodoId { get; set; }
+        public string Message { get; set; }
+        public Guid UserId { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public Todo? Todo { get; set; }
+
+
+
+    }
+}

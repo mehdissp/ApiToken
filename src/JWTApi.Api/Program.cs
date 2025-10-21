@@ -152,8 +152,11 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITodoStatus, TodoStatusRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWorkRepository>();
+builder.Services.AddScoped<IBaleRepository, BaleRepository>();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<BaleService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<TodoStatusService>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IPasswordHasher<User>, Microsoft.AspNetCore.Identity.PasswordHasher<User>>();
@@ -197,6 +200,13 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping; // برای کاراکترهای خاص
     });
+builder.Services.AddHttpClient("BaleClient", client =>
+{
+    client.BaseAddress = new Uri("https://tapi.bale.ai/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
 var app = builder.Build();
 
 // Middleware pipeline - ترتیب بسیار مهم است

@@ -18,12 +18,14 @@ namespace JWTApi.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AuthService _authService;
+        private readonly BaleService _baleService;
         private readonly IMemoryCache _memoryCache;
         private static readonly Random Rand = new();
-        public AuthController(AuthService authService ,IMemoryCache memoryCache)
+        public AuthController(AuthService authService , IMemoryCache memoryCache, BaleService baleService)
         {
             _memoryCache = memoryCache;
             _authService = authService;
+            _baleService = baleService;
         }
 
         [HttpGet]
@@ -47,6 +49,8 @@ namespace JWTApi.API.Controllers
 
             var (success, token, refresh,expireToken) = await _authService.LoginAsync(dto, ip, cancellationToken);
             var result = new { token, refreshToken = refresh,ExpireToken= expireToken };
+
+            //await _baleService.SendWelcomeMessage(dto.Username, ip);
             return success
         ? ResponseApi.Ok(result).ToHttpResponse()
         : Unauthorized();

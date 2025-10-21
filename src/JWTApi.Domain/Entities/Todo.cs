@@ -23,6 +23,7 @@ namespace JWTApi.Domain.Entities
        // public Project? Project { get; set; }
         public ICollection<TodoTag> TodoTags { get; set; } = new List<TodoTag>();
         public ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
+        public ICollection<TodoStatus> TodoStatuses { get; set; } = new List<TodoStatus>();
     }
     //public enum TodoStatus
     //{

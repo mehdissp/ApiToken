@@ -19,5 +19,13 @@ namespace JWTApi.Domain.Interfaces
          Task AddLoginAttemptAsync(LoginAttempt loginAttempt, CancellationToken cancellationToken);
         Task CheckAndLockIp(string? ip);
         Task<List<MenuUi>> GetUserMenuPermissionsForUiAsync(string userId, CancellationToken cancellationToken);
+        Task AddUserWithAnotherUsers(User user, string userId, CancellationToken cancellationToken);
+        Task<PagedResult<User>> GetUsersAsync(string userId, int pageNumber, int pageSize, CancellationToken cancellationToken);
+        Task<bool> checkUserNameDublicated(string userName, CancellationToken cancellationToken);
+        Task<bool> checkMobileDublicated(string mobileNumber, CancellationToken cancellationToken);
+        Task<bool> checkUserNameDublicatedUpdate(string userName, string userId, CancellationToken cancellationToken);
+        Task<bool> checkMobileDublicatedUpdate(string mobileNumber, string userId, CancellationToken cancellationToken);
+
+
     }
 }

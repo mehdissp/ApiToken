@@ -59,10 +59,12 @@ namespace JWTApi.Infrastructure.Data
             {
                 b.HasKey(u => u.Id);
                 b.Property(u => u.Name).HasMaxLength(100).IsRequired();
-                b.Property(u => u.Email).HasMaxLength(200).IsRequired();
+                b.Property(u => u.Email).HasMaxLength(200);
+                b.Property(u => u.FullName).HasMaxLength(200);
+                b.Property(u => u.MobileNumber).HasMaxLength(200).IsRequired();
                 b.Property(u => u.PasswordHash).IsRequired();
                 b.Property(u => u.CreatedAt).HasDefaultValueSql("GETDATE()");
-
+                b.Property(r => r.IsActive).HasDefaultValue(true);
                 b.HasMany(u => u.Todos)
                  .WithOne(t => t.User)
                  .HasForeignKey(t => t.UserId);
@@ -147,6 +149,15 @@ namespace JWTApi.Infrastructure.Data
                 b.Property(t => t.Name).HasMaxLength(75).IsRequired();
                 b.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()");
 
+            });
+
+            // ---------------- Comment ----------------
+            modelBuilder.Entity<Comment>(b =>
+            {
+                b.HasKey(t => t.Id);
+                b.Property(t => t.Message).HasMaxLength(1000).IsRequired();
+                b.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()");
+        
             });
 
             // ---------------- Tag ----------------
