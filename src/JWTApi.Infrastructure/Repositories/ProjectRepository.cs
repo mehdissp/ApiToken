@@ -35,7 +35,7 @@ namespace JWTApi.Infrastructure.Repositories
                 .SumAsync(ep => (int?)ep.CountProject) ?? 0;
             var totalAllowed = totalFromPackages + totalExtra;
             // ۴. بررسی محدودیت
-            if (currentProjects >= totalAllowed)
+            if (currentProjects > totalAllowed)
             {
                 throw new RestBasedException("شما به حداکثر تعداد پروژه مجاز خود رسیده‌اید.", 403);
             }

@@ -54,6 +54,12 @@ namespace JWTApi.Infrastructure.Data
                 b.Property(x => x.IPAddress).HasMaxLength(50).IsRequired();
                 b.HasIndex(x => x.IPAddress).IsUnique();
             });
+            modelBuilder.Entity<Role>(b =>
+            {
+            
+                b.Property(x => x.Name).HasMaxLength(250).IsRequired();
+              
+            });
             // ---------------- User ----------------
             modelBuilder.Entity<User>(b =>
             {

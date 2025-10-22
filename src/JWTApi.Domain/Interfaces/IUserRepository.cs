@@ -25,6 +25,7 @@ namespace JWTApi.Domain.Interfaces
         Task<bool> checkMobileDublicated(string mobileNumber, CancellationToken cancellationToken);
         Task<bool> checkUserNameDublicatedUpdate(string userName, string userId, CancellationToken cancellationToken);
         Task<bool> checkMobileDublicatedUpdate(string mobileNumber, string userId, CancellationToken cancellationToken);
+        Task<List<Role>> GetRoleCombo(CancellationToken cancellationToken);
 
 
     }

@@ -13,5 +13,7 @@ namespace JWTApi.Domain.Interfaces
         Task InsertTodoStatus(int projectId, string name, string color, CancellationToken cancellationToken);
         Task UpdateTodoStatus(int id, string name, string color, int? orderNum, CancellationToken cancellationToken);
         Task DeleteTodoStatus(int id, CancellationToken cancellationToken);
+
+        Task<List<Tag>> GetTags(CancellationToken cancellationToken);
     }
 }

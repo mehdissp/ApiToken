@@ -12,7 +12,7 @@ namespace JWTApi.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class TodoStatusController : ControllerBase
     {
         private readonly TodoStatusService _todoStatus;
@@ -69,6 +69,16 @@ namespace JWTApi.Api.Controllers
             await _todoStatus.DeleteTodoStatus(id, cancellationToken);
 
             return ResponseApi.Ok().ToHttpResponse();
+
+        }
+
+        [HttpGet("GetTags")]
+        public async Task<IActionResult> GetTags( CancellationToken cancellationToken)
+        {
+            //var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var result = await _todoStatus.GetTagsAsync( cancellationToken);
+
+            return ResponseApi.Ok(result).ToHttpResponse();
 
         }
 

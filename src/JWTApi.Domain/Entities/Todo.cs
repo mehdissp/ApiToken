@@ -10,6 +10,7 @@ namespace JWTApi.Domain.Entities
     {
         public int Id { get; set; }
         public Guid UserId { get; set; }
+        public Guid UserTodo { get; set; }
         //public int ProjectId { get; set; }
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
@@ -24,6 +25,21 @@ namespace JWTApi.Domain.Entities
         public ICollection<TodoTag> TodoTags { get; set; } = new List<TodoTag>();
         public ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
         public ICollection<TodoStatus> TodoStatuses { get; set; } = new List<TodoStatus>();
+        private Todo()
+        {
+
+        }
+        public Todo(string title,string description,int statusId,string userId,int priority,DateTime? dueDate,string userTodo)
+        {
+            
+            Title = title;
+            Description = description;
+            StatusId = statusId;
+            Priority = (TodoPriority)priority;
+            UserId = Guid.Parse(userId);
+            DueDate = dueDate;
+            UserTodo = Guid.Parse(userTodo);
+        }
     }
     //public enum TodoStatus
     //{
@@ -37,4 +53,5 @@ namespace JWTApi.Domain.Entities
         Medium = 2,
         High = 3
     }
+  
 }

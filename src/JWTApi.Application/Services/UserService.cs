@@ -26,7 +26,7 @@ namespace JWTApi.Application.Services
         {
             if (await _userRepo.GetByUsernameAsync(dto.Username, cancellationToken) != null)
                 return (false, "User already exists");
-            if (await _userRepo.checkMobileDublicated(dto.MobileNumber, cancellationToken) != null)
+            if (await _userRepo.checkMobileDublicated(dto.MobileNumber, cancellationToken) ==true)
                 return (false, "MobileNumber already exists");
 
             var user = new User(dto.Username, dto.Email, dto.IsActive, dto.MobileNumber,dto.fullname);
@@ -57,6 +57,11 @@ namespace JWTApi.Application.Services
                 PageSize = result.PageSize,
                 Max=result.Max
             };
+        }
+
+        public async Task<List<Role>> GetRole(CancellationToken cancellationToken)
+        {
+            return await _userRepo.GetRoleCombo(cancellationToken);
         }
 
     }

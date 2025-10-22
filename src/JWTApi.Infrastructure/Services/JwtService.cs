@@ -74,7 +74,7 @@ namespace JWTApi.Infrastructure.Services
             }
 
             // زمان انقضا
-            var expires = DateTime.Now.AddMinutes(30);
+            var expires = DateTime.Now.AddHours(30);
 
     var token = new JwtSecurityToken(
         issuer: jwt["Issuer"],

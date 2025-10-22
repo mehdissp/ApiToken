@@ -102,5 +102,10 @@ namespace JWTApi.Infrastructure.Repositories
             todoStatus.OrderNum = orderNum;
 
         }
+
+        public async Task<List<Tag>> GetTags(CancellationToken cancellationToken)
+        {
+            return await _context.Tags.ToListAsync(cancellationToken);
+        }
     }
 }

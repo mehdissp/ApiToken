@@ -153,6 +153,8 @@ builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITodoStatus, TodoStatusRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWorkRepository>();
 builder.Services.AddScoped<IBaleRepository, BaleRepository>();
+builder.Services.AddScoped<ITodo, TodoRepository>();
+builder.Services.AddScoped<TodoService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<BaleService>();
 builder.Services.AddScoped<AuthService>();

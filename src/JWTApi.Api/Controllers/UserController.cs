@@ -44,5 +44,31 @@ namespace JWTApi.Api.Controllers
             return ResponseApi.Ok(response).ToHttpResponse();
 
         }
+        [HttpPost("GetUsersCombo")]
+        public async Task<IActionResult> GetUsersCombo([FromBody] PageSizeViewModel pageSize, CancellationToken cancellationToken)
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var result = await _userService.GetNewUser(userId, pageSize.PageNumber, pageSize.PageSize, cancellationToken);
+            var response = new
+            {
+                Items = result.Items,
+                TotalCount = result.TotalCount,
+                TotalPages = result.TotalPages,
+                Max = result.Max
+            };
+            return ResponseApi.Ok(response).ToHttpResponse();
+
+        }
+
+
+        [HttpGet("GetRoleCombo")]
+        public async Task<IActionResult> GetRoleCombo(CancellationToken cancellationToken)
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var result = await _userService.GetRole( cancellationToken);
+          
+            return ResponseApi.Ok(result).ToHttpResponse();
+
+        }
     }
 }

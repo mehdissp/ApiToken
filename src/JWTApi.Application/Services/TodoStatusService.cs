@@ -36,5 +36,10 @@ namespace JWTApi.Application.Services
             await _todoStatus.DeleteTodoStatus(id,  cancellationToken);
             await _unit.SaveChanges(cancellationToken);
         }
+
+        public async Task<List<Tag>> GetTagsAsync(CancellationToken cancellationToken)
+        {
+            return await _todoStatus.GetTags(cancellationToken);
+        }
     }
 }

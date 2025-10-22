@@ -55,7 +55,7 @@ namespace JWTApi.Infrastructure.Repositories
             // ۴. بررسی محدودیت
             if (currentProjects >= totalAllowed)
             {
-                throw new RestBasedException("شما به حداکثر تعداد کاربر مجاز خود رسیده‌اید.", 500);
+                throw new RestBasedException("شما به حداکثر تعداد کاربر مجاز خود رسیده‌اید.", 402);
             }
             user.UserId = Guid.Parse(userId);
             await _context.AddAsync(user, cancellationToken);
@@ -202,6 +202,11 @@ namespace JWTApi.Infrastructure.Repositories
         public async Task<bool> checkMobileDublicatedUpdate(string mobileNumber, string userId, CancellationToken cancellationToken)
         {
             return await _context.Users.AnyAsync(s => s.MobileNumber == mobileNumber && s.Id.ToString() != userId);
+        }
+
+        public async Task<List<Role>> GetRoleCombo(CancellationToken cancellationToken)
+        {
+            return await _context.Roles.Where(s => s.IsSeen == true).ToListAsync(cancellationToken);
         }
     }
 }
