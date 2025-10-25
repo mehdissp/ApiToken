@@ -15,6 +15,7 @@ namespace JWTApi.Application.DTOs.Todo
         public int Priority { get; set; }
         public string? DueDate { get; set; }
         public string? UserId { get; set; }
+        public  bool isArchive { get; set; }
         public List<TodoTagsDtos> todoTagsDtos { get; set; }
     }
 

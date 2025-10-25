@@ -82,7 +82,8 @@ namespace JWTApi.Application.Services
             {
                 todoEdit.UserId = userId;
             }
-            await _todo.UpdateTodo(todoEdit.Id,todoEdit.Title,todoEdit.Description,todoEdit.StatusId,todoEdit.UserId,todoEdit.Priority, dateTime,cancellation);
+            await _todo.UpdateTodo(todoEdit.Id,todoEdit.Title,todoEdit.Description,todoEdit.StatusId,todoEdit.UserId
+                ,todoEdit.Priority, dateTime, todoEdit.isArchive, userId, cancellation);
             var todoTags = todoEdit.todoTagsDtos.Select(tagDto => new TodoTag
             {
                 TodoId = todoEdit.Id,

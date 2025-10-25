@@ -1,6 +1,6 @@
 ﻿using JWTApi.Domain.Dtos.Comment;
 using JWTApi.Domain.Entities;
-using JWTApi.Domain.Interfaces.Comment;
+using JWTApi.Domain.Interfaces.Comments;
 using JWTApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JWTApi.Infrastructure.Repositories.Comment
+namespace JWTApi.Infrastructure.Repositories.Comments
 {
     public class CommentRepository : IComment
     {
@@ -34,11 +34,11 @@ namespace JWTApi.Infrastructure.Repositories.Comment
                             .Select(u => u.FullName)
                             .First() ?? "نامشخص" : null
             }).ToListAsync(cancellationToken);
-                
+        }
 
-     
-
-
+        public async Task InsertComment(Comment comment,CancellationToken cancellationToken)
+        {
+            await _context.Comments.AddAsync(comment, cancellationToken);
         }
     }
 }

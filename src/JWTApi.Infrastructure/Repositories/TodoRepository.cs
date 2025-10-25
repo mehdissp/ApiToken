@@ -40,7 +40,7 @@ namespace JWTApi.Infrastructure.Repositories
             var result = await _context.Todos
                 .Include(t => t.TodoTags)
                     .ThenInclude(tt => tt.Tag)
-                .Where(t => (t.UserId.ToString() == userId || t.UserTodo.ToString() == userId) && t.IsDeleted==false)
+                .Where(t => (t.UserId.ToString() == userId || t.UserTodo.ToString() == userId) && t.IsDeleted==false && t.IsArchive==false)
                 .Select(t => new TodoWithTagsView
                 {
                     Id = t.Id,
@@ -106,7 +106,7 @@ namespace JWTApi.Infrastructure.Repositories
         }
 
         public async Task UpdateTodo(int id ,string title,string desc,int statusId,string userIdTodo,int priority
-            ,DateTime dueDate
+            ,DateTime dueDate,bool isArchive,string userId 
             , CancellationToken cancellationToken)
         {
             var todo = await GetTodoAsync(id, cancellationToken);
@@ -116,6 +116,11 @@ namespace JWTApi.Infrastructure.Repositories
             todo.Title = title;
             todo.Priority = (TodoPriority)priority;
             todo.Description = desc;
+            if (todo.UserId.ToString() != userId)
+            {
+                throw new RestBasedException(ApiErrorCodeMessage.Error_Access);
+            }
+            todo.IsArchive = isArchive;
         }
 
         public async Task UpdateTodoTags(List<TodoTag> newTodoTags, CancellationToken cancellationToken)
@@ -156,33 +161,7 @@ namespace JWTApi.Infrastructure.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        private int GetIsOverDueDate(DateTime? dateTime)
-        {
-            if (dateTime is null)
-            {
-                return 0;
-            }
-
-            DateTime now = DateTime.Now;
-            TimeSpan difference = dateTime.Value - now;
-
-            if (difference.TotalDays <= 0)
-            {
-                return 1; // تاریخ گذشته
-            }
-            else if (difference.TotalDays <= 15)
-            {
-                return 2; // کمتر از 15 روز مانده
-            }
-            else if (difference.TotalDays <= 30)
-            {
-                return 3; // کمتر از 30 روز مانده
-            }
-            else
-            {
-                return 0; // بیشتر از 30 روز مانده
-            }
-        }
+      
 
     }
 }

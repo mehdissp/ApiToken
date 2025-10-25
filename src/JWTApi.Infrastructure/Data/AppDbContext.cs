@@ -149,6 +149,7 @@ namespace JWTApi.Infrastructure.Data
 
                 b.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()");
                 b.Property(r => r.IsDeleted).HasDefaultValue(false);
+                b.Property(r => r.IsArchive).HasDefaultValue(false);
             });
 
             // ---------------- TodoStatus ----------------

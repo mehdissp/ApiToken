@@ -12,9 +12,17 @@ namespace JWTApi.Domain.Entities
         public int TodoId { get; set; }
         public string Message { get; set; }
         public Guid UserId { get; set; }
+        public bool IsDeleted { get; set; } = false;
         public DateTime CreatedAt { get; set; }
         public Todo? Todo { get; set; }
+        private Comment() { }
 
+        public Comment(int todoId,string message,string userId)
+        {
+            TodoId = todoId;
+            Message = message;
+            UserId = Guid.Parse(userId);
+        }
 
 
     }

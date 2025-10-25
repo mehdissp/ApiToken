@@ -16,7 +16,7 @@ namespace JWTApi.Domain.Interfaces
         Task<Todo?> GetTodoAsync(int id, CancellationToken cancellation);
         Task UpdateTodoWithStatusId(int id, int statusId, CancellationToken cancellationToken);
         Task UpdateTodo(int id, string title, string desc, int statusId, string userIdTodo, int priority
-            , DateTime dueDate
+            , DateTime dueDate,bool isArchive, string userId
             , CancellationToken cancellationToken);
 
         Task UpdateTodoTags(List<TodoTag> newTodoTags, CancellationToken cancellationToken);

@@ -20,6 +20,7 @@ namespace JWTApi.Domain.Entities
         public DateTime? DueDate { get; set; }
         public DateTime? CompletedAt { get; set; }
         public bool IsDeleted { get; set; } = false;
+        public bool IsArchive { get; set; } = false;
 
         public User User { get; set; } = null!;
         // public Project? Project { get; set; }
