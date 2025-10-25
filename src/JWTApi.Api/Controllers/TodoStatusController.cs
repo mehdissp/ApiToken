@@ -50,7 +50,9 @@ namespace JWTApi.Api.Controllers
                         CreatedAt = t.CreatedAt,
                         UserNameCreator = t.UserNameCreator,
                         UserIdTodo=t.UserIdTodo,
-                        Tags = t.Tags
+                        Tags = t.Tags,
+                        CountComment=t.CountComment,
+                        IsOverdute=t.IsOverdute
                        
                     })
                 }).OrderBy(c => c.OrderNum)

@@ -14,6 +14,8 @@ public class TodoWithTagsView
     public DateTime? DueDate { get; set; }
     public DateTime? CompletedAt { get; set; }
     public string UserIdTodo { get; set; }
+    public int? CountComment { get; set; }
+    public int? IsOverdute { get; set; }
     public List<TagDto> Tags { get; set; } = new List<TagDto>();
 }
 
