@@ -19,15 +19,16 @@ namespace JWTApi.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? DueDate { get; set; }
         public DateTime? CompletedAt { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         public User User { get; set; } = null!;
        // public Project? Project { get; set; }
         public ICollection<TodoTag> TodoTags { get; set; } = new List<TodoTag>();
         public ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
         public ICollection<TodoStatus> TodoStatuses { get; set; } = new List<TodoStatus>();
-        private Todo()
+        public Todo(bool isDeleted)
         {
-
+            IsDeleted = isDeleted;
         }
         public Todo(string title,string description,int statusId,string userId,int priority,DateTime? dueDate,string userTodo)
         {

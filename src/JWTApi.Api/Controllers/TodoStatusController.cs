@@ -3,6 +3,8 @@ using JWTApi.Api.ViewModels;
 using JWTApi.Api.ViewModels.Project;
 using JWTApi.Api.ViewModels.TodoStatus;
 using JWTApi.Application.Services;
+using JWTApi.Domain.Entities;
+using JWTApi.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,18 +18,44 @@ namespace JWTApi.Api.Controllers
     public class TodoStatusController : ControllerBase
     {
         private readonly TodoStatusService _todoStatus;
-        public TodoStatusController(TodoStatusService todoStatusService)
+        private readonly TodoService _todo;
+        public TodoStatusController(TodoStatusService todoStatusService, TodoService todoService)
         {
             _todoStatus = todoStatusService;
+            _todo = todoService;
         }
 
         [HttpGet("GetTodoStatus")]
         public async Task<IActionResult> GetTodoStatus([FromQuery] int projectId, CancellationToken cancellationToken)
         {
-            //var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             var result = await _todoStatus.GetTodoStatusesAsync(projectId,cancellationToken);
-       
-            return ResponseApi.Ok(result).ToHttpResponse();
+            var todo = await _todo.TodoWithTagsViewsAsync(userId, cancellationToken);
+            var results = new
+            {
+                Columns = result.Select(s => new
+                {
+                    Id = s.Id,
+                    Title = s.Name,
+                    Color = s.Color,
+                    OrderNum = s.OrderNum,
+                    Tasks = todo.Where(t => t.StatusId == s.Id).Select(t => new
+                    {
+                        Id = t.Id,
+                        Title = t.Title,
+                        Description = t.Description,
+                        Priority = t.Priority,
+                        Assignee = t.UserNameTodo,
+                        DueDate = t.DueDate,
+                        CreatedAt = t.CreatedAt,
+                        UserNameCreator = t.UserNameCreator,
+                        Tags = t.Tags
+                    })
+                }).OrderBy(c => c.OrderNum)
+            };
+
+
+            return ResponseApi.Ok(results).ToHttpResponse();
 
         }
 

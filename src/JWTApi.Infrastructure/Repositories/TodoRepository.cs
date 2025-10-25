@@ -1,6 +1,8 @@
-﻿using JWTApi.Domain.Entities;
+﻿using JWTApi.Domain.Dtos;
+using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
 using JWTApi.Infrastructure.Data;
+using JWTApi.Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -29,68 +31,7 @@ namespace JWTApi.Infrastructure.Repositories
          
         }
 
-        //public async Task<List<TodoWithTagsView>> GetTodosWithTags(string userId,CancellationToken cancellationToken)
-        //{
-        //    var result = await _context.Todos
-        //        .Include(t => t.TodoTags)
-        //            .ThenInclude(tt => tt.Tag).Where(s=>s.UserId.ToString()== userId || s.UserTodo.ToString() == userId)
-        //        .Select(async t => new TodoWithTagsView
-        //        {
-        //            Id = t.Id,
-        //            UserNameCreator = _context.Users.Where(s=>s.UserId==t.UserId).Select(s=>s.FullName).FirstOrDefault(),
-        //            UserNameTodo = _context.Users.Where(s => s.UserId == t.UserTodo).Select(s => s.FullName).FirstOrDefault(),
-        //            Title = t.Title,
-        //            Description = t.Description,
-        //            StatusId = t.StatusId,
-        //            Priority = (TodoPriority)t.Priority,
-        //            CreatedAt = t.CreatedAt,
-        //            DueDate = t.DueDate,
-        //            CompletedAt = t.CompletedAt,
-        //            Tags = t.TodoTags.Select(tt => new TagDto
-        //            {
-        //                Id = tt.Tag.Id,
-        //                Name = tt.Tag.Name
-        //            }).ToList()
-        //        })
-        //        .ToListAsync(cancellationToken);
-
-        //    return result;
-        //}
-        //public async Task<List<TodoWithTagsView>> GetTodosWithTags(string userId, CancellationToken cancellationToken)
-        //{
-        //    var result = await _context.Todos
-        //        .Include(t => t.TodoTags)
-        //            .ThenInclude(tt => tt.Tag)
-        //        .Where(t => t.UserId.ToString() == userId || t.UserTodo.ToString() == userId)
-        //        .Select(t => new TodoWithTagsView
-        //        {
-        //            Id = t.Id,
-        //            UserNameCreator = _context.Users
-        //                .Where(u => u.UserId == t.UserId)
-        //                .Select(u => u.FullName)
-        //                .FirstOrDefault(),
-        //            UserNameTodo = _context.Users
-        //                .Where(u => u.UserId == t.UserTodo)
-        //                .Select(u => u.FullName)
-        //                .FirstOrDefault(),
-        //            Title = t.Title,
-        //            Description = t.Description,
-        //            StatusId = t.StatusId,
-        //            Priority = (TodoPriority)t.Priority,
-        //            CreatedAt = t.CreatedAt,
-        //            DueDate = t.DueDate,
-        //            CompletedAt = t.CompletedAt,
-        //            Tags = t.TodoTags.Select(tt => new TagDto
-        //            {
-        //                Id = tt.Tag.Id,
-        //                Name = tt.Tag.Name
-        //            }).ToList()
-        //        })
-        //        .ToListAsync(cancellationToken);
-
-        //    return result;
-        //}
-        //public async InsertTodoTags(t)
+     
         public async Task<List<TodoWithTagsView>> GetTodosWithTags(string userId, CancellationToken cancellationToken)
         {
             // ابتدا بررسی کنیم چه داده‌هایی در دیتابیس وجود دارد
@@ -108,7 +49,7 @@ namespace JWTApi.Infrastructure.Repositories
             var result = await _context.Todos
                 .Include(t => t.TodoTags)
                     .ThenInclude(tt => tt.Tag)
-                .Where(t => t.UserId.ToString() == userId || t.UserTodo.ToString() == userId)
+                .Where(t => (t.UserId.ToString() == userId || t.UserTodo.ToString() == userId) && t.IsDeleted==false)
                 .Select(t => new TodoWithTagsView
                 {
                     Id = t.Id,
@@ -132,12 +73,35 @@ namespace JWTApi.Infrastructure.Repositories
                     Tags = t.TodoTags.Select(tt => new TagDto
                     {
                         Id = tt.Tag.Id,
-                        Name = tt.Tag.Name
+                        Name = tt.Tag.Name,
+                        Color=tt.Tag.Color
                     }).ToList()
                 })
                 .ToListAsync(cancellationToken);
 
             return result;
         }
+
+
+        public async Task DeleteAsync(int id,string userId, CancellationToken cancellationToken)
+        {
+            // گرفتن پروژه به همراه بررسی وجود تو دوها
+
+            var todo = await _context.Todos
+           
+                .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+
+            if (todo == null)
+                throw new RestBasedException(ApiErrorCodeMessage.Error_NotFound);
+            if (todo.UserId.ToString() !=userId)
+            {
+                throw new RestBasedException(ApiErrorCodeMessage.Error_Access);
+            }
+            todo.IsDeleted = true;
+
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+
     }
 }
