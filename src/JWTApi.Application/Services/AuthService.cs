@@ -119,6 +119,9 @@ namespace JWTApi.Application.Services
                 Username = user.Username,
                 Email = user.Email,
               //  ProfileImagePath = user.ProfileImagePath
+              MobileNumber=user.MobileNumber,
+              FullName=user.FullName,
+              CreatedAt=user.CreatedAt
             };
         }
 

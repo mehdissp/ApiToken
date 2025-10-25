@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace JWTApi.Infrastructure.Repositories
@@ -70,6 +71,7 @@ namespace JWTApi.Infrastructure.Repositories
                     CreatedAt = t.CreatedAt,
                     DueDate = t.DueDate,
                     CompletedAt = t.CompletedAt,
+                    UserIdTodo=t.UserTodo.ToString(),
                     Tags = t.TodoTags.Select(tt => new TagDto
                     {
                         Id = tt.Tag.Id,
@@ -87,9 +89,7 @@ namespace JWTApi.Infrastructure.Repositories
         {
             // گرفتن پروژه به همراه بررسی وجود تو دوها
 
-            var todo = await _context.Todos
-           
-                .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            var todo = await GetTodoAsync(id,cancellationToken);
 
             if (todo == null)
                 throw new RestBasedException(ApiErrorCodeMessage.Error_NotFound);
@@ -98,10 +98,69 @@ namespace JWTApi.Infrastructure.Repositories
                 throw new RestBasedException(ApiErrorCodeMessage.Error_Access);
             }
             todo.IsDeleted = true;
+        }
+        public async Task<Todo?> GetTodoAsync(int id,CancellationToken cancellation)
+        {
+            return  await _context.Todos
+                .FirstOrDefaultAsync(p => p.Id == id, cancellation);
+        }
+
+        public async Task UpdateTodoWithStatusId(int id,int statusId,CancellationToken cancellationToken)
+        {
+            var todo = await GetTodoAsync(id, cancellationToken);
+            todo.StatusId = statusId;
+        }
+
+        public async Task UpdateTodo(int id ,string title,string desc,int statusId,string userIdTodo,int priority
+            ,DateTime dueDate
+            , CancellationToken cancellationToken)
+        {
+            var todo = await GetTodoAsync(id, cancellationToken);
+            todo.DueDate = dueDate;
+            todo.StatusId = statusId;
+            todo.UserTodo = Guid.Parse(userIdTodo);
+            todo.Title = title;
+            todo.Priority = (TodoPriority)priority;
+            todo.Description = desc;
+        }
+
+        public async Task UpdateTodoTags(List<TodoTag> newTodoTags, CancellationToken cancellationToken)
+        {
+            if (!newTodoTags.Any()) return;
+
+            var todoId = newTodoTags.First().TodoId;
+
+            // گرفتن فقط تگ‌های مربوط به این TodoId
+            var existingTodoTags = await _context.TodoTags
+                .Where(t => t.TodoId == todoId)
+                .ToListAsync(cancellationToken);
+
+            // ایجاد HashSet از TagIdهای موجود و جدید
+            var existingTagIds = new HashSet<int>(existingTodoTags.Select(t => t.TagId));
+            var newTagIds = new HashSet<int>(newTodoTags.Select(t => t.TagId));
+
+            // اضافه کردن تگ‌های جدید
+            var tagsToAdd = newTodoTags
+                .Where(t => !existingTagIds.Contains(t.TagId))
+                .ToList();
+
+            // حذف تگ‌های قدیمی
+            var tagsToRemove = existingTodoTags
+                .Where(t => !newTagIds.Contains(t.TagId))
+                .ToList();
+
+            if (tagsToAdd.Any())
+            {
+                await _context.TodoTags.AddRangeAsync(tagsToAdd, cancellationToken);
+            }
+
+            if (tagsToRemove.Any())
+            {
+                _context.TodoTags.RemoveRange(tagsToRemove);
+            }
 
             await _context.SaveChangesAsync(cancellationToken);
         }
-
 
     }
 }

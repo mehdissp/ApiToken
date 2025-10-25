@@ -13,6 +13,7 @@ public class TodoWithTagsView
     public DateTime CreatedAt { get; set; }
     public DateTime? DueDate { get; set; }
     public DateTime? CompletedAt { get; set; }
+    public string UserIdTodo { get; set; }
     public List<TagDto> Tags { get; set; } = new List<TagDto>();
 }
 

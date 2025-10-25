@@ -1,4 +1,4 @@
-﻿using JWTApi.Application.DTOs;
+﻿using JWTApi.Application.DTOs.Todo;
 using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
 using System;
@@ -51,10 +51,46 @@ namespace JWTApi.Application.Services
 
         }
 
+        public async Task DeleteTodo(int id,string userId ,CancellationToken cancellationToken)
+        {
+            await _todo.DeleteAsync(id, userId, cancellationToken);
+            await _unitOfWork.SaveChanges(cancellationToken);
+
+        }
+
 
         public async Task<List<TodoWithTagsView>> TodoWithTagsViewsAsync(string userId,CancellationToken cancellationToken)
         {
             return await _todo.GetTodosWithTags(userId, cancellationToken);
+        }
+
+        public async Task UpdateTodoWithStatusId(int id,int statusId,CancellationToken cancellation)
+        {
+            await _todo.UpdateTodoWithStatusId(id, statusId, cancellation);
+            await _unitOfWork.SaveChanges(cancellation);
+
+        }
+
+        public async Task UpdateTodo(TodoEditDtos todoEdit,string userId, CancellationToken cancellation)
+        {
+            DateTime dateTime = new DateTime();
+            if (todoEdit.DueDate is not null)
+            {
+                dateTime = ShamsiToMiladiConverter.ConvertShamsiToMiladi(todoEdit.DueDate);
+            }
+            if (todoEdit.UserId is null)
+            {
+                todoEdit.UserId = userId;
+            }
+            await _todo.UpdateTodo(todoEdit.Id,todoEdit.Title,todoEdit.Description,todoEdit.StatusId,todoEdit.UserId,todoEdit.Priority, dateTime,cancellation);
+            var todoTags = todoEdit.todoTagsDtos.Select(tagDto => new TodoTag
+            {
+                TodoId = todoEdit.Id,
+                TagId = tagDto.Id // یا TagId اگر پراپرتی نامش متفاوت است
+            }).ToList();
+            await _todo.UpdateTodoTags(todoTags, cancellation);
+            await _unitOfWork.SaveChanges(cancellation);
+
         }
     }
 }

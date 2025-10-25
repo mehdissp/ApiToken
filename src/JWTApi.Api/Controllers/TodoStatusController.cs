@@ -49,7 +49,9 @@ namespace JWTApi.Api.Controllers
                         DueDate = t.DueDate,
                         CreatedAt = t.CreatedAt,
                         UserNameCreator = t.UserNameCreator,
+                        UserIdTodo=t.UserIdTodo,
                         Tags = t.Tags
+                       
                     })
                 }).OrderBy(c => c.OrderNum)
             };
@@ -73,6 +75,8 @@ namespace JWTApi.Api.Controllers
             return ResponseApi.Ok().ToHttpResponse();
 
         }
+
+
 
         [HttpPost("UpdateTodoStatus")]
         public async Task<IActionResult> UpdateTodoStatus([FromBody] TodoStatusViewModel todoStatusViewModel, CancellationToken cancellationToken)

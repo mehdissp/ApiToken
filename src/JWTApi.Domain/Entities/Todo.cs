@@ -22,17 +22,19 @@ namespace JWTApi.Domain.Entities
         public bool IsDeleted { get; set; } = false;
 
         public User User { get; set; } = null!;
-       // public Project? Project { get; set; }
+        // public Project? Project { get; set; }
         public ICollection<TodoTag> TodoTags { get; set; } = new List<TodoTag>();
         public ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
         public ICollection<TodoStatus> TodoStatuses { get; set; } = new List<TodoStatus>();
-        public Todo(bool isDeleted)
+
+        public Todo(int statusId)
         {
-            IsDeleted = isDeleted;
+            StatusId = statusId;
+
         }
-        public Todo(string title,string description,int statusId,string userId,int priority,DateTime? dueDate,string userTodo)
+        public Todo(string title, string description, int statusId, string userId, int priority, DateTime? dueDate, string userTodo)
         {
-            
+
             Title = title;
             Description = description;
             StatusId = statusId;
@@ -54,5 +56,5 @@ namespace JWTApi.Domain.Entities
         Medium = 2,
         High = 3
     }
-  
+
 }
