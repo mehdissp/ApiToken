@@ -52,8 +52,10 @@ namespace JWTApi.Api.Controllers
                         UserIdTodo=t.UserIdTodo,
                         Tags = t.Tags,
                         CountComment=t.CountComment,
-                        IsOverdute=t.IsOverdute
-                       
+                        IsOverdute=t.IsOverdute,
+                        deleteButton=t.DeleteButton,
+                        editButton=t.EditButton
+
                     })
                 }).OrderBy(c => c.OrderNum)
             };

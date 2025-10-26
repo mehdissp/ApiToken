@@ -46,10 +46,10 @@ namespace JWTApi.Api.Controllers
 
 
         [HttpPost("DeleteTodo")]
-        public async Task<IActionResult> DeleteTodo([FromBody] TodoDeleteViewModel projectAddViewModel, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteTodo([FromBody] TodoDeleteViewModel todoDeleteViewModel, CancellationToken cancellationToken)
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            await _todoService.DeleteTodo(projectAddViewModel.Id, userId, cancellationToken);
+            await _todoService.DeleteTodo(todoDeleteViewModel.Id, userId, cancellationToken);
 
             return ResponseApi.Ok().ToHttpResponse();
 
@@ -71,7 +71,7 @@ namespace JWTApi.Api.Controllers
         public async Task<IActionResult> UpdateStatusTodo([FromBody] TodoUpdateStatusViewModel todo, CancellationToken cancellationToken)
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            await _todoService.UpdateTodoWithStatusId(todo.Id, todo.StatusId, cancellationToken);
+            await _todoService.UpdateTodoWithStatusId(todo.Id, userId, todo.StatusId, cancellationToken);
             return ResponseApi.Ok().ToHttpResponse();
         }
 

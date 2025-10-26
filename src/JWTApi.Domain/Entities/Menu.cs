@@ -14,9 +14,10 @@ namespace JWTApi.Domain.Entities
         public string? Label { get; set; }
         public string? Icon { get; set; }
         public string? Url { get; set; } // مثل /api/users یا /admin/dashboard
-        public string? Controller { get; set; }
-        public string? Action { get; set; }
+        //public string? Controller { get; set; }
+        //public string? Action { get; set; }
         public bool? IsMenu { get; set; }
+        public bool IsDefault { get; set; } = false;
 
         public int? ParentId { get; set; }
         public Menu? Parent { get; set; }

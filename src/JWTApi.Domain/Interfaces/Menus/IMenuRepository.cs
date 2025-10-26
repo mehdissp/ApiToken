@@ -1,0 +1,15 @@
+﻿using JWTApi.Domain.Dtos.Menu;
+using JWTApi.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace JWTApi.Domain.Interfaces.Menus
+{
+    public interface IMenuRepository
+    {
+        Task<List<Menu>> GetMenuTreeAsync();
+    }
+}

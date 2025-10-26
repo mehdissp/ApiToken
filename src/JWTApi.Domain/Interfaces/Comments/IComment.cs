@@ -10,7 +10,10 @@ namespace JWTApi.Domain.Interfaces.Comments
 {
    public interface IComment
     {
-        Task<List<CommentDto>> GetComment(int todoId, CancellationToken cancellationToken);
+        Task<List<CommentDto>> GetComment(int todoId, string userId, CancellationToken cancellationToken);
         Task InsertComment(Comment comment, CancellationToken cancellationToken);
+        Task<Comment?> GetCommentFindByIdAsync(int id, CancellationToken cancellationToken);
+        Task DeleteComment(int id, string userId, CancellationToken cancellationToken);
+        Task UpdateSeenFlag(int todoId, string userId, CancellationToken cancellationToken);
     }
 }

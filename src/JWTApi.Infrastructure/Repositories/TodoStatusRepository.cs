@@ -1,6 +1,8 @@
-﻿using JWTApi.Domain.Entities;
+﻿using JWTApi.Domain.Dtos;
+using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
 using JWTApi.Infrastructure.Data;
+using JWTApi.Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -19,6 +21,11 @@ namespace JWTApi.Infrastructure.Repositories
         }
         public async Task DeleteTodoStatus(int id, CancellationToken cancellationToken)
         {
+            var check = await _context.Todos.Where(s => s.StatusId == id).CountAsync(cancellationToken);
+            if (check >0)
+            {
+                throw new RestBasedException(ApiErrorCodeMessage.Error_Refrence);
+            }
             TodoStatus todoStatus = await GetAsync(id, cancellationToken);
             todoStatus.IsDeleted = true;
 

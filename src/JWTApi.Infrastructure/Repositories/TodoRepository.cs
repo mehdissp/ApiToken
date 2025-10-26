@@ -62,7 +62,10 @@ namespace JWTApi.Infrastructure.Repositories
                     DueDate = t.DueDate,
                     CompletedAt = t.CompletedAt,
                     UserIdTodo=t.UserTodo.ToString(),
-                    CountComment=_context.Comments.Where(s=>s.TodoId==t.Id).Count(),
+                    DeleteButton=t.UserId.ToString()== userId ?true :false,
+                    EditButton = t.UserId.ToString() == userId ? true : false,
+                    CountComment =_context.Comments.Where(s=>s.TodoId==t.Id && s.IsDeleted==false).Count(),
+
                     IsOverdute = t.DueDate == null ? 0 :
                         t.DueDate <= DateTime.Now.AddDays(1) ? 1 :
                         t.DueDate <= DateTime.Now.AddDays(20) ? 2 : 3,

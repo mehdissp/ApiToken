@@ -14,7 +14,10 @@ namespace JWTApi.Domain.Entities
         public Guid UserId { get; set; }
         public bool IsDeleted { get; set; } = false;
         public DateTime CreatedAt { get; set; }
+        public bool IsSeen { get; set; } = false;
+        public DateTime? SeenAt { get; set; }
         public Todo? Todo { get; set; }
+
         private Comment() { }
 
         public Comment(int todoId,string message,string userId)

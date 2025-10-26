@@ -13,6 +13,9 @@ namespace JWTApi.Domain.Dtos.Comment
         public string UserAuthor { get; set; }
         public string Message { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string UserId { get; set; }
+        public bool ShowDeleted { get; set; }
+        public DateTime? SeenAt { get; set; }
 
     }
 }

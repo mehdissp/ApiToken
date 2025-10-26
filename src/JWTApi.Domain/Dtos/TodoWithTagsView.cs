@@ -5,6 +5,7 @@ public class TodoWithTagsView
     public int Id { get; set; }
     public string UserNameCreator { get; set; }
     public string UserNameTodo { get; set; }
+
     public int? ProjectId { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
@@ -16,6 +17,8 @@ public class TodoWithTagsView
     public string UserIdTodo { get; set; }
     public int? CountComment { get; set; }
     public int? IsOverdute { get; set; }
+    public bool DeleteButton { get; set; }
+    public bool EditButton { get; set; }
     public List<TagDto> Tags { get; set; } = new List<TagDto>();
 }
 

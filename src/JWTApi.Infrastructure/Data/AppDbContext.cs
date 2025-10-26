@@ -231,11 +231,12 @@ namespace JWTApi.Infrastructure.Data
                 b.HasKey(m => m.Id);
                 b.Property(m => m.Name).HasMaxLength(200).IsRequired();
                 b.Property(m => m.Url).HasMaxLength(500);
-
+                b.Property(t => t.IsDefault).HasDefaultValue(false);
                 b.HasOne(m => m.Parent)
                  .WithMany(p => p.Children)
                  .HasForeignKey(m => m.ParentId)
                  .OnDelete(DeleteBehavior.Restrict); // حذف منوی والد، فرزندان حذف نشوند
+
             });
         }
     }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace JWTApi.Application.Services
@@ -53,6 +54,7 @@ namespace JWTApi.Application.Services
 
         public async Task DeleteTodo(int id,string userId ,CancellationToken cancellationToken)
         {
+            await _unitOfWork.CheckAccess(id, userId, cancellationToken);
             await _todo.DeleteAsync(id, userId, cancellationToken);
             await _unitOfWork.SaveChanges(cancellationToken);
 
@@ -64,8 +66,9 @@ namespace JWTApi.Application.Services
             return await _todo.GetTodosWithTags(userId, cancellationToken);
         }
 
-        public async Task UpdateTodoWithStatusId(int id,int statusId,CancellationToken cancellation)
+        public async Task UpdateTodoWithStatusId(int id,string userId,int statusId,CancellationToken cancellation)
         {
+            await _unitOfWork.CheckAccess(id, userId, cancellation);
             await _todo.UpdateTodoWithStatusId(id, statusId, cancellation);
             await _unitOfWork.SaveChanges(cancellation);
 
@@ -73,6 +76,7 @@ namespace JWTApi.Application.Services
 
         public async Task UpdateTodo(TodoEditDtos todoEdit,string userId, CancellationToken cancellation)
         {
+            await _unitOfWork.CheckAccess(todoEdit.Id, userId, cancellation);
             DateTime dateTime = new DateTime();
             if (todoEdit.DueDate is not null)
             {
