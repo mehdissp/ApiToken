@@ -10,6 +10,6 @@ namespace JWTApi.Domain.Interfaces.Menus
 {
     public interface IMenuRepository
     {
-        Task<List<Menu>> GetMenuTreeAsync();
+        Task<List<MenuItem>> GetMenuTreeAsync();
     }
 }

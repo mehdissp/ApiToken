@@ -17,7 +17,7 @@ namespace JWTApi.Application.Services.Menus
             _menuRepository = menuRepository;
         }
 
-        public async Task<List<Menu>> MenuItemsAsync()
+        public async Task<List<MenuItem>> MenuItemsAsync()
         {
             return await _menuRepository.GetMenuTreeAsync();
         }

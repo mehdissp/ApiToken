@@ -3,56 +3,57 @@ using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces.Menus;
 using JWTApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JWTApi.Infrastructure.Repositories.Menus
 {
     public class MenuRepository : IMenuRepository
     {
-
         private readonly AppDbContext _context;
+
         public MenuRepository(AppDbContext appDbContext)
         {
             _context = appDbContext;
-
-
         }
 
-        public async Task<List<Menu>> GetMenuTreeAsync()
+        public async Task<List<MenuItem>> GetMenuTreeAsync()
         {
-            // خواندن مستقیم همه منوها از دیتابیس
+            // خواندن همه منوها بدون Include (برای جلوگیری از circular reference)
             var allMenus = await _context.Menus
-                .Include(m => m.Children)
+                .AsNoTracking() // برای عملکرد بهتر
+
                 .ToListAsync();
 
             return BuildTree(allMenus);
         }
 
-        private List<Menu> BuildTree(List<Menu> allMenus)
+        private List<MenuItem> BuildTree(List<Menu> allMenus)
         {
-            var rootMenus = allMenus.Where(x => x.ParentId == null).ToList();
-
-            foreach (var rootMenu in rootMenus)
+            // تبدیل به MenuItem و ساخت درخت
+            var menuItems = allMenus.Select(m => new MenuItem
             {
-                AddChildren(rootMenu, allMenus);
+                Id = m.Id,
+                Name = m.Name,
+                ParentId = m.ParentId,
+                Url=m.Url,
+                Children = new List<MenuItem>()
+            }).ToList();
+
+            var lookup = menuItems.ToDictionary(m => m.Id);
+            var rootMenus = new List<MenuItem>();
+
+            foreach (var menuItem in menuItems)
+            {
+                if (menuItem.ParentId.HasValue && lookup.ContainsKey(menuItem.ParentId.Value))
+                {
+                    lookup[menuItem.ParentId.Value].Children.Add(menuItem);
+                }
+                else
+                {
+                    rootMenus.Add(menuItem);
+                }
             }
 
             return rootMenus;
-        }
-
-        private void AddChildren(Menu parent, List<Menu> allMenus)
-        {
-            var children = allMenus.Where(x => x.ParentId == parent.Id).ToList();
-
-            foreach (var child in children)
-            {
-                AddChildren(child, allMenus);
-                parent.Children.Add(child);
-            }
         }
     }
 }
