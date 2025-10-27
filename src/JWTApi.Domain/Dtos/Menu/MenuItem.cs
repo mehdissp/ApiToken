@@ -17,6 +17,7 @@ namespace JWTApi.Domain.Dtos.Menu
         public string Path { get; set; }
         public bool? IsMenu { get; set; }
         public bool? IsDefault { get; set; }
+        public bool IsCheck { get; set; }
         public List<MenuItem> Children { get; set; } = new List<MenuItem>();
     }
     public class MenuTree

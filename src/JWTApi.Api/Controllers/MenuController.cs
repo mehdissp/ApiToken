@@ -1,5 +1,7 @@
 ﻿using JWTApi.Api.Response;
 using JWTApi.Api.ViewModels;
+using JWTApi.Application.DTOs.MenuAccess;
+using JWTApi.Application.DTOs.Todo;
 using JWTApi.Application.Services;
 using JWTApi.Application.Services.Menus;
 using JWTApi.Domain.Entities;
@@ -21,12 +23,12 @@ namespace JWTApi.Api.Controllers
         }
 
         [HttpGet("GetMenuItemsAsync")]
-        public async Task<IActionResult> GetMenuItemsAsync( CancellationToken cancellationToken)
+        public async Task<IActionResult> GetMenuItemsAsync([FromQuery] string roleId , CancellationToken cancellationToken)
         {
             try
             {
                 var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-                var result = await _menu.MenuItemsAsync();
+                var result = await _menu.MenuItemsAsync(roleId,cancellationToken);
 
                 return ResponseApi.Ok(result).ToHttpResponse();
             }
@@ -35,8 +37,19 @@ namespace JWTApi.Api.Controllers
 
                 throw;
             }
-  
+        }
+
+        [HttpPost("InsertOrDeleteMenuAccess")]
+        public async Task<IActionResult> InsertOrDeleteMenuAccess([FromBody] List<MenuAccessDtos> menuAccess, [FromQuery] string roleId, CancellationToken cancellationToken)
+        {
+
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+          await _menu.InsertOrDeleteMenuAccess(menuAccess, roleId, cancellationToken);
+
+            return ResponseApi.Ok().ToHttpResponse();
 
         }
+
+
     }
 }

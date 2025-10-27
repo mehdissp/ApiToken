@@ -4,6 +4,7 @@ using JWTApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JWTApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251027111902_mig-editrolemenu")]
+    partial class migeditrolemenu
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -717,7 +720,7 @@ namespace JWTApi.Infrastructure.Migrations
             modelBuilder.Entity("JWTApi.Domain.Entities.RolePermission", b =>
                 {
                     b.HasOne("JWTApi.Domain.Entities.Permission", "Permission")
-                        .WithMany()
+                        .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -835,6 +838,8 @@ namespace JWTApi.Infrastructure.Migrations
             modelBuilder.Entity("JWTApi.Domain.Entities.Permission", b =>
                 {
                     b.Navigation("RoleMenus");
+
+                    b.Navigation("RolePermissions");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Project", b =>

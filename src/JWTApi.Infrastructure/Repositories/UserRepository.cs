@@ -82,11 +82,11 @@ namespace JWTApi.Infrastructure.Repositories
                     MenuId = menu.Id,
                     MenuName = menu.Name,
                     Url = menu.Url,
-                    Permissions = _context.RoleMenus
-    .Where(rmp => userRoleIds.Contains(rmp.RoleId) && rmp.MenuId == menu.Id )
-    .Select(rmp => rmp.Permission.Name)
-    .Distinct()
-    .ToList()
+    //                Permissions = _context.RoleMenus
+    //.Where(rmp => userRoleIds.Contains(rmp.RoleId) && rmp.MenuId == menu.Id )
+    //.Select(rmp => rmp.Permission.Name)
+    //.Distinct()
+    //.ToList()
 
                 })
                 .ToListAsync(cancellationToken);
@@ -104,7 +104,7 @@ namespace JWTApi.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
 
             // گرفتن منوها و دسترسی‌ها
-            var menuPermissions = await _context.Menus.Where(s=>s.IsMenu==true)
+            var menuPermissions = await _context.Menus.Where(s=>s.IsMenu==true && s.ParentId ==null)
                 .Select(menu => new MenuUi
                 {
                     Id = menu.Id,

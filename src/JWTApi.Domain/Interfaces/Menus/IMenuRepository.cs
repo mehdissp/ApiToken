@@ -10,6 +10,8 @@ namespace JWTApi.Domain.Interfaces.Menus
 {
     public interface IMenuRepository
     {
-        Task<List<MenuItem>> GetMenuTreeAsync();
+        Task<List<MenuItem>> GetMenuTreeAsync(string roleId,CancellationToken cancellationToken);
+        Task InsertOrDeleteMenuAccess(List<RoleMenu> roleMenus, CancellationToken cancellationToken);
+        Task DeleteMenuAccess(string roleId, CancellationToken cancellationToken);
     }
 }

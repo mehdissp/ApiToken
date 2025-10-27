@@ -218,9 +218,9 @@ namespace JWTApi.Infrastructure.Data
                  .WithMany(m => m.RoleMenus)
                  .HasForeignKey(rm => rm.MenuId);
 
-                b.HasOne(rm => rm.Permission)
-            .WithMany(m => m.RoleMenus)
-            .HasForeignKey(rm => rm.PermissionId);
+            //    b.HasOne(rm => rm.Permission)
+            //.WithMany(m => m.RoleMenus)
+            //.HasForeignKey(rm => rm.PermissionId);
 
 
             });

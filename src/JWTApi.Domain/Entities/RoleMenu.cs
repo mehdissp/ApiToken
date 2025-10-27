@@ -11,10 +11,10 @@ namespace JWTApi.Domain.Entities
         
         public Guid RoleId { get; set; }
         public int MenuId { get; set; }
-        public Guid PermissionId { get; set; }
+        //public Guid PermissionId { get; set; }
 
         public Role Role { get; set; } = default!;
         public Menu Menu { get; set; } = default!;
-        public Permission Permission { get; set; } = default!;
+        //public Permission Permission { get; set; } = default!;
     }
 }

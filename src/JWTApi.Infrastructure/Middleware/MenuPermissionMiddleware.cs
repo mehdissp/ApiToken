@@ -67,20 +67,20 @@ public class MenuPermissionMiddleware
         // حالا بررسی دکمه/عملیات
         string actionCode = context.Request.Headers["X-Action-Code"].FirstOrDefault() ?? "";
 
-        if (!string.IsNullOrEmpty(actionCode))
-        {
-            var allowedPermissions = await _context.RoleMenus
-                .Where(rmp => userRoles.Contains(rmp.RoleId) && rmp.MenuId == menu.Id)
-                .Select(rmp => rmp.Permission.Code)
-                .ToListAsync();
+        //if (!string.IsNullOrEmpty(actionCode))
+        //{
+        //    var allowedPermissions = await _context.RoleMenus
+        //        .Where(rmp => userRoles.Contains(rmp.RoleId) && rmp.MenuId == menu.Id)
+        //        .Select(rmp => rmp.Permission.Code)
+        //        .ToListAsync();
 
-            if (!allowedPermissions.Contains(actionCode))
-            {
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                await context.Response.WriteAsync($"Access denied to action '{actionCode}' on menu '{menu.Name}'.");
-                return;
-            }
-        }
+        //    if (!allowedPermissions.Contains(actionCode))
+        //    {
+        //        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        //        await context.Response.WriteAsync($"Access denied to action '{actionCode}' on menu '{menu.Name}'.");
+        //        return;
+        //    }
+        //}
         await _next(context);
     }
 }
