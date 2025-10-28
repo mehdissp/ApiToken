@@ -56,22 +56,32 @@ namespace JWTApi.Infrastructure.Services
         new Claim(JwtRegisteredClaimNames.Sub, user.Username),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         new Claim("id", user.Id.ToString()),
+    
         new Claim(ClaimTypes.Name, user.Username)
     };
+            var firstRole = user.UserRoles.FirstOrDefault();
+            if (firstRole != null)
+            {
+               /* claims.Add(new Claim(ClaimTypes.Role, firstRole.Role.Name))*/;
+                claims.Add(new Claim("roleId", firstRole.RoleId.ToString()));
+                //claims.Add(new Claim("roleName", firstRole.Role.Name));
+            }
             //// اضافه کردن نقش‌ها و دسترسی‌ها
-            foreach (var role in user.UserRoles.Select(ur => ur.Role))
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role.Name));
+            //foreach (var role in user.UserRoles.Select(ur => ur.Role))
+            //{
+            //    claims.Add(new Claim(ClaimTypes.Role, role.Name));
 
-                //foreach (var perm in role.RolePermissions.Select(rp => rp.Permission))
-                //{
-                //    claims.Add(new Claim("permission", perm.Code));
-                //}
-            }
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
+            //    //foreach (var perm in role.RolePermissions.Select(rp => rp.Permission))
+            //    //{
+            //    //    claims.Add(new Claim("permission", perm.Code));
+            //    //}
+            //}
+            //foreach (var role in roles)
+            //{
+            //    claims.Add(new Claim(ClaimTypes.Role, role));
+            //}
+
+
 
             // زمان انقضا
             var expires = DateTime.Now.AddHours(30);

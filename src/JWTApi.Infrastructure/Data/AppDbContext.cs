@@ -32,6 +32,9 @@ namespace JWTApi.Infrastructure.Data
         public DbSet<Attachment> Attachments { get; set; }
 
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<ProjectUser> ProjectUsers { get; set; }
+
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -85,9 +88,9 @@ namespace JWTApi.Infrastructure.Data
                .WithOne(t => t.User)
                .HasForeignKey(t => t.UserId);
 
-                b.HasMany(u => u.Projects)
-                 .WithOne(p => p.User)
-                 .HasForeignKey(p => p.UserId);
+                //b.HasMany(u => u.Projects)
+                // .WithOne(p => p.User)
+                // .HasForeignKey(p => p.UserId);
 
             });
 
@@ -206,6 +209,26 @@ namespace JWTApi.Infrastructure.Data
                  .HasForeignKey(r => r.TodoId);
 
             });
+
+            
+                            modelBuilder.Entity<ProjectUser>(b =>
+                            {
+                                b.HasKey(rm => new { rm.UserId, rm.ProjectId });
+
+                                b.HasOne(rm => rm.user)
+                                 .WithMany(r => r.ProjectUsers)
+                                 .HasForeignKey(rm => rm.UserId);
+
+                                b.HasOne(rm => rm.project)
+                                 .WithMany(m => m.ProjectUsers)
+                                 .HasForeignKey(rm => rm.ProjectId);
+
+                                //    b.HasOne(rm => rm.Permission)
+                                //.WithMany(m => m.RoleMenus)
+                                //.HasForeignKey(rm => rm.PermissionId);
+
+
+                            });
             modelBuilder.Entity<RoleMenu>(b =>
             {
                 b.HasKey(rm => new { rm.RoleId, rm.MenuId });

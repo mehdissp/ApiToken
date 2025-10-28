@@ -1,5 +1,6 @@
 ﻿using JWTApi.Application.DTOs;
 using JWTApi.Domain.Dtos;
+using JWTApi.Domain.Dtos.ProjectUsers;
 using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -31,23 +32,44 @@ namespace JWTApi.Application.Services
 
             var user = new User(dto.Username, dto.Email, dto.IsActive, dto.MobileNumber,dto.fullname);
             user.SetPassword(_hasher.HashPassword(user, dto.Password));
-            await _userRepo.AddUserWithAnotherUsers(user, userId, cancellationToken);
+            await _userRepo.AddUserWithAnotherUsers(user, userId,dto.RoleId, cancellationToken);
+            //await _unit.SaveChanges(cancellationToken);
+            return (true, "User created successfully");
+        }
+
+        public async Task<(bool Success, string Message)> UpdateUserAsync(UpdateNewUserDto dto, string userId, CancellationToken cancellationToken)
+        {
+            if (await _userRepo.checkUserNameDublicatedUpdate(dto.Username,dto.UserId, cancellationToken) != null)
+                return (false, "User already exists");
+            if (await _userRepo.checkMobileDublicatedUpdate(dto.MobileNumber,dto.UserId, cancellationToken) == true)
+                return (false, "MobileNumber already exists");
+            var user = await _userRepo.GetByUserIdAsync(dto.UserId,cancellationToken);
+
+            user.SetPassword(_hasher.HashPassword(user, dto.Password));
+            
             await _unit.SaveChanges(cancellationToken);
             return (true, "User created successfully");
         }
+
         public async Task<PagedResult<GetNewUserDto>> GetNewUser(string userId, int pageNumber, int pageSize, CancellationToken cancellationToken)
         {
             var result = await _userRepo.GetUsersAsync(userId, pageNumber, pageSize, cancellationToken);
 
-            var users = result.Items.Select(user => new GetNewUserDto(
-                Id: user.Id,
-                Username: user.Username,
-                Email: user.Email,
-                IsActive: user.IsActive,
-                MobileNumber: user.MobileNumber,
-                createdAt: user.CreatedAt,
-                fullname:user.FullName
-            )).ToList();
+            var users = result.Items.Select(user =>
+            {
+                var userRole = user.UserRoles.FirstOrDefault();
+                return new GetNewUserDto(
+                    Id: user.Id,
+                    Username: user.Username,
+                    Email: user.Email,
+                    IsActive: user.IsActive,
+                    MobileNumber: user.MobileNumber,
+                    createdAt: user.CreatedAt,
+                    fullname: user.FullName,
+                    roleId: userRole?.Role?.Id.ToString() ?? string.Empty,
+                    roleName: userRole?.Role?.Name ?? string.Empty
+                );
+            }).ToList();
 
             return new PagedResult<GetNewUserDto>
             {
@@ -55,13 +77,18 @@ namespace JWTApi.Application.Services
                 TotalCount = result.TotalCount,
                 PageNumber = result.PageNumber,
                 PageSize = result.PageSize,
-                Max=result.Max
+                Max = result.Max
             };
         }
 
         public async Task<List<Role>> GetRole(CancellationToken cancellationToken)
         {
             return await _userRepo.GetRoleCombo(cancellationToken);
+        }
+
+        public async Task<PagedResult<ProjectUserDtos>> GetProjectUserDtosAsync(string userId,int projectId,int pageNumber, int pageSize, CancellationToken cancellationToken)
+        {
+            return await _userRepo.GetProjectUserDtos(userId, projectId, pageNumber, pageSize, cancellationToken);
         }
 
     }

@@ -2,7 +2,10 @@
 using JWTApi.Api.ViewModels;
 using JWTApi.Api.ViewModels.Project;
 using JWTApi.Application.DTOs;
+using JWTApi.Application.DTOs.MenuAccess;
+using JWTApi.Application.DTOs.ProjectUsers;
 using JWTApi.Application.Services;
+using JWTApi.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -44,15 +47,35 @@ namespace JWTApi.Api.Controllers
         public async Task<IActionResult> GetProject([FromBody]PageSizeViewModel pageSize, CancellationToken cancellationToken)
         {
                 var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-                var result = await _projectService.GetProjectsAsync(userId, pageSize.PageNumber, pageSize.PageSize, cancellationToken);
+            var roleId = User.Claims.FirstOrDefault(c => c.Type == "roleId")?.Value;
+            var t = User.Claims;
+            var result = await _projectService.GetProjectsAsync(userId, roleId, pageSize.PageNumber, pageSize.PageSize, cancellationToken);
                 var response = new
                 {
                     Items = result.Items,
                     TotalCount = result.TotalCount,
-                    TotalPages = result.TotalPages
+                    TotalPages = result.TotalPages,
+                    CheckAccess=result.CheckAccess,
+                    CheckAccessDelete= result.CheckAccessDelete,
+                    CheckAccessAssigner = result.CheckAccessAssigner
+
                 };
                 return ResponseApi.Ok(response).ToHttpResponse();
         
+        }
+
+
+        [HttpPost("InsertOrDeleteProjectUser")]
+        public async Task<IActionResult> InsertOrDeleteProjectUser([FromBody] List<ProjectUserDtos> projectUsers, [FromQuery] int projectId, CancellationToken cancellationToken)
+        {
+
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            
+
+            await _projectService.InsertOrDeleteUserInProject(projectUsers, projectId, cancellationToken);
+
+            return ResponseApi.Ok().ToHttpResponse();
+
         }
 
     }

@@ -20,5 +20,8 @@ namespace JWTApi.Domain.Dtos
         public int TotalCount { get; set; }
         public bool HasPrevious => CurrentPage > 1;
         public bool HasNext => CurrentPage < TotalPages;
+        public bool CheckAccess { get; set; }
+        public bool CheckAccessDelete { get; set; }
+        public bool CheckAccessAssigner { get; set; }
     }
 }

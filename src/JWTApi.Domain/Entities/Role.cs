@@ -11,6 +11,7 @@ namespace JWTApi.Domain.Entities
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
+        public Int16 TypeRole { get; set; }
         public bool IsSeen { get; set; } = true;
 
         public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();

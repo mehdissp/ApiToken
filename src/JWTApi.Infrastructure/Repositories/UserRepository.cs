@@ -9,6 +9,7 @@ using JWTApi.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using JWTApi.Domain.Dtos;
 using JWTApi.Infrastructure.Exceptions;
+using JWTApi.Domain.Dtos.ProjectUsers;
 
 namespace JWTApi.Infrastructure.Repositories
 {
@@ -21,7 +22,7 @@ namespace JWTApi.Infrastructure.Repositories
         }
 
         public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken)
-            => await _context.Users.FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
+            => await _context.Users.Include(s=>s.UserRoles).FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
         public async Task<List<string>> GetUserRolesAsync(Guid userId, CancellationToken cancellationToken)
     =>  await _context.UserRoles
             .Where(ur => ur.UserId == userId)
@@ -37,29 +38,97 @@ namespace JWTApi.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task AddUserWithAnotherUsers(User user,string userId,CancellationToken cancellationToken)
-        {
-            var currentProjects = await _context.Users.CountAsync(p => p.UserId.ToString() == userId, cancellationToken);
-            // ۲. مجموع پروژه‌های مجاز از پکیج‌ها
-            var totalFromPackages = await _context.UserPackages
-                .Where(up => up.UserId.ToString() == userId)
-                .Include(up => up.Package)
-                .SumAsync(up => (int?)up.Package.MaxUsers) ?? 0;
+        //public async Task AddUserWithAnotherUsers(User user,string userId,string roleId,CancellationToken cancellationToken)
+        //{
+        //    var currentProjects = await _context.Users.CountAsync(p => p.UserId.ToString() == userId, cancellationToken);
+        //    // ۲. مجموع پروژه‌های مجاز از پکیج‌ها
+        //    var totalFromPackages = await _context.UserPackages
+        //        .Where(up => up.UserId.ToString() == userId)
+        //        .Include(up => up.Package)
+        //        .SumAsync(up => (int?)up.Package.MaxUsers) ?? 0;
 
-            // ۳. مجموع پروژه‌های خرید اضافه
+        //    // ۳. مجموع پروژه‌های خرید اضافه
+        //    var totalExtra = await _context.ExtraProjects
+        //        .Where(ep => ep.UserId.ToString() == userId)
+        //        .SumAsync(ep => (int?)ep.CountUsers) ?? 0;
+        //    var totalAllowed = totalFromPackages + totalExtra;
+
+        //    // ۴. بررسی محدودیت
+        //    if (currentProjects >= totalAllowed)
+        //    {
+        //        throw new RestBasedException("شما به حداکثر تعداد کاربر مجاز خود رسیده‌اید.", 402);
+        //    }
+        //    user.UserId = Guid.Parse(userId);
+        //    await _context.AddAsync(user, cancellationToken);
+        //    await _context.SaveChangesAsync(cancellationToken);
+        //    UserRole userRole = new UserRole
+        //    {
+        //        UserId = user.Id,
+        //        RoleId = Guid.Parse(roleId)
+        //    };
+        //    await _context.UserRoles.AddAsync(userRole, cancellationToken);
+        //    await _context.SaveChangesAsync(cancellationToken);
+        //}
+
+        public async Task AddUserWithAnotherUsers(User user, string userId, string roleId, CancellationToken cancellationToken)
+        {
+            // 1. تبدیل شناسه‌ها به Guid
+            var userGuid = Guid.Parse(userId);
+            var roleGuid = Guid.Parse(roleId);
+
+            // 2. بررسی محدودیت تعداد کاربران
+            var currentUsersCount = await _context.Users
+                .CountAsync(u => u.UserId == userGuid, cancellationToken);
+
+            var totalFromPackages = await _context.UserPackages
+                .Where(up => up.UserId == userGuid)
+                .Include(up => up.Package)
+                .SumAsync(up => (int?)up.Package.MaxUsers, cancellationToken) ?? 0;
+
             var totalExtra = await _context.ExtraProjects
-                .Where(ep => ep.UserId.ToString() == userId)
-                .SumAsync(ep => (int?)ep.CountUsers) ?? 0;
+                .Where(ep => ep.UserId == userGuid)
+                .SumAsync(ep => (int?)ep.CountUsers, cancellationToken) ?? 0;
+
             var totalAllowed = totalFromPackages + totalExtra;
 
-            // ۴. بررسی محدودیت
-            if (currentProjects >= totalAllowed)
+            if (currentUsersCount >= totalAllowed)
             {
                 throw new RestBasedException("شما به حداکثر تعداد کاربر مجاز خود رسیده‌اید.", 402);
             }
-            user.UserId = Guid.Parse(userId);
-            await _context.AddAsync(user, cancellationToken);
+
+            // 3. استفاده از تراکنش برای عملیات اتمیک
+            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                // 4. افزودن کاربر جدید
+                user.UserId = userGuid;
+                await _context.Users.AddAsync(user, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                // 5. اختصاص نقش به کاربر
+                var userRole = new UserRole
+                {
+                    UserId = user.Id, // فرض می‌کنیم User.Id خودکار تولید می‌شود
+                    RoleId = roleGuid
+                };
+
+                await _context.UserRoles.AddAsync(userRole, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                // 6. تأیید تراکنش
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
+
+
+     
+
 
         public async Task UpdateAsync(User user)
         {
@@ -156,9 +225,63 @@ namespace JWTApi.Infrastructure.Repositories
         //{
         //    return await _context.Users.Where(s => s.UserId.ToString() == userId).ToListAsync(cancellationToken);
         //}
+        //    public async Task<PagedResult<User>> GetUsersAsync(string userId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        //    {
+        //        var query = _context.UserRoles.Include(s=>s.User).Include(s=>s.Role).Include(S=>S.User.UserPackages).ThenInclude(s=>s.Package).Where(s => s.UserId.ToString() == userId);
+
+        //        var totalCount = await query.CountAsync(cancellationToken);
+
+        //        var users = await query
+        //            .Skip((pageNumber - 1) * pageSize)
+        //            .Take(pageSize)
+        //            .ToListAsync(cancellationToken);
+
+
+
+        //        var maxUsers = await _context.Users
+        //.Where(u => u.Id.ToString() ==userId)
+        //.SelectMany(u => u.UserPackages)
+        //.Select(up => up.Package.MaxUsers)
+        //.FirstOrDefaultAsync(cancellationToken);
+
+
+        //        return new PagedResult<User>
+        //        {
+        //            Items = users,
+        //            TotalCount = totalCount,
+        //            PageNumber = pageNumber,
+        //            PageSize = pageSize,
+        //            Max= maxUsers
+        //        };
+        //    }
+
         public async Task<PagedResult<User>> GetUsersAsync(string userId, int pageNumber, int pageSize, CancellationToken cancellationToken)
         {
-            var query = _context.Users.Include(S=>S.UserPackages).ThenInclude(s=>s.Package).Where(s => s.UserId.ToString() == userId);
+            // تبدیل userId به Guid
+            if (!Guid.TryParse(userId, out var userGuid))
+            {
+                throw new ArgumentException("Invalid user ID format");
+            }
+
+            // پیدا کردن کاربر اصلی و پکیج مربوطه
+            var currentUserPackage = await _context.Users
+                .Where(u => u.Id == userGuid)
+                .SelectMany(u => u.UserPackages)
+                .Select(up => new { up.Package.MaxUsers })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (currentUserPackage == null)
+            {
+                throw new Exception("User package not found");
+            }
+
+            // کوئری برای گرفتن کاربران تحت مدیریت
+            var query = _context.Users
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .Include(u => u.UserPackages)
+                    .ThenInclude(up => up.Package)
+                .Where(u => u.UserId == userGuid); // یا منطق کسب و کار شما
 
             var totalCount = await query.CountAsync(cancellationToken);
 
@@ -167,26 +290,15 @@ namespace JWTApi.Infrastructure.Repositories
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);
 
-
-
-            var maxUsers = await _context.Users
-    .Where(u => u.Id.ToString() ==userId)
-    .SelectMany(u => u.UserPackages)
-    .Select(up => up.Package.MaxUsers)
-    .FirstOrDefaultAsync(cancellationToken);
-
-
             return new PagedResult<User>
             {
                 Items = users,
                 TotalCount = totalCount,
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                Max= maxUsers
+                Max = currentUserPackage.MaxUsers
             };
         }
-
-
         public async Task<bool> checkUserNameDublicated(string userName,CancellationToken cancellationToken)
         {
             return await _context.Users.AnyAsync(s => s.Username == userName);
@@ -208,5 +320,85 @@ namespace JWTApi.Infrastructure.Repositories
         {
             return await _context.Roles.Where(s => s.IsSeen == true).ToListAsync(cancellationToken);
         }
+
+
+        public async Task<PagedResult<ProjectUserDtos>> GetProjectUserDtos(string userId,int projectId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        {
+            var baseQuery = from u in _context.Users
+                            join r in _context.UserRoles on u.Id equals r.UserId into userRoles
+                            from ur in userRoles.DefaultIfEmpty()
+                            join q in _context.Roles on ur.RoleId equals q.Id into roles
+                            from role in roles.DefaultIfEmpty()
+                            where u.UserId.ToString() == GetUserIdManager(userId)
+                            && u.Id.ToString() != userId
+                            select new ProjectUserDtos
+                            {
+                                Id = u.Id,
+                                FullName = u.FullName,
+                                RoleName = role.Name,
+                                IsCheck = _context.ProjectUsers.Any(pu => pu.UserId == u.Id && pu.ProjectId == projectId)
+                            };
+
+            // گرفتن تعداد کل رکوردها
+            var totalCount = await baseQuery.CountAsync(cancellationToken);
+
+            // اعمال صفحه‌بندی
+            var users = await baseQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return new PagedResult<ProjectUserDtos>
+            {
+                Items = users,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
+
+        private string GetUserIdManager(string userId)
+        {
+
+            var baseQuery = from u in _context.Users
+                            join ur in _context.UserRoles on u.UserId equals ur.UserId into userRoles
+                            from ur in userRoles.DefaultIfEmpty()
+                            join r in _context.Roles on ur.RoleId equals r.Id into roles
+                            from role in roles.DefaultIfEmpty()
+                            where u.Id == Guid.Parse(userId) // فقط کاربرانی که نقش دارند
+                            select new
+                            {
+                                User = u,
+                                RoleId = ur.RoleId,
+                                RoleName = role.Name,
+                                Role = role
+                            };
+            var baseQuery2 = (from u in _context.Users
+                              join ur in _context.UserRoles on u.Id equals ur.UserId
+                              join r in _context.Roles on ur.RoleId equals r.Id
+                              where u.Id == baseQuery.FirstOrDefault().User.UserId
+                              select new
+                              {
+                                  User = u,
+                                  RoleId = ur.RoleId,
+                                  RoleName = r.Name,
+                                  Role = r
+                              }).ToList();
+            if (baseQuery2.Count()==0)
+            {
+                return userId;
+            }
+            if (baseQuery2.FirstOrDefault().Role.TypeRole == 1)
+            {
+                return userId;
+            }
+            else
+            {
+                var t = baseQuery2.First().User.Id.ToString();
+                return t;
+            }
+
+        }
+
     }
 }
