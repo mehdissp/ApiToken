@@ -8,7 +8,9 @@ namespace JWTApi.Application.DTOs
 {
     public record RegisterDto(string Username, string Email, string Password);
     public record RegisterNewUserDto(string Username, string Email, string Password,bool IsActive,string MobileNumber,string fullname,string RoleId);
-    public record UpdateNewUserDto(string UserId,string RoleId,string Username, string Email, string Password, bool IsActive, string MobileNumber, string fullname);
+    public record UpdateNewUserDto(string UserId,string RoleId,string Username, string? Email,
+        string? Password, bool IsActive, 
+        string MobileNumber, string fullname,bool IsChangePassword);
     public record GetNewUserDto(Guid Id,string Username, string Email, bool IsActive, string MobileNumber
         ,DateTime createdAt,string fullname,string roleName ,string roleId);
     public record LoginDto(string Username, string Password);

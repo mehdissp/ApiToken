@@ -44,8 +44,12 @@ namespace JWTApi.Application.Services
             if (await _userRepo.checkMobileDublicatedUpdate(dto.MobileNumber,dto.UserId, cancellationToken) == true)
                 return (false, "MobileNumber already exists");
             var user = await _userRepo.GetByUserIdAsync(dto.UserId,cancellationToken);
-
-            user.SetPassword(_hasher.HashPassword(user, dto.Password));
+            if (dto.IsChangePassword==true)
+            {
+                user.SetPassword(_hasher.HashPassword(user, dto.Password));
+            }
+            user =new User(dto.Username,dto.Email,dto.IsActive,dto.MobileNumber,dto.fullname)
+    ;
             
             await _unit.SaveChanges(cancellationToken);
             return (true, "User created successfully");
