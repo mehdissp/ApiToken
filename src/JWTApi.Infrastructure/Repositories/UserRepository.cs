@@ -22,7 +22,7 @@ namespace JWTApi.Infrastructure.Repositories
         }
 
         public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken)
-            => await _context.Users.Include(s=>s.UserRoles).FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
+            => await _context.Users.Include(s=>s.UserRoles).FirstOrDefaultAsync(u => u.Username == username && u.IsActive ==true, cancellationToken);
         public async Task<List<string>> GetUserRolesAsync(Guid userId, CancellationToken cancellationToken)
     =>  await _context.UserRoles
             .Where(ur => ur.UserId == userId)
@@ -31,6 +31,9 @@ namespace JWTApi.Infrastructure.Repositories
             .ToListAsync();
         public async Task<User?> GetByUserIdAsync(string userId, CancellationToken cancellationToken)
        => await _context.Users.FirstOrDefaultAsync(u => u.Id.ToString() == userId, cancellationToken);
+
+        public async Task<User?> GetByUserIdAsyncForToken(string userId)
+=> await _context.Users.FirstOrDefaultAsync(u => u.Id.ToString() == userId);
 
         public async Task AddAsync(User user, CancellationToken cancellationToken)
         {
@@ -126,8 +129,40 @@ namespace JWTApi.Infrastructure.Repositories
             }
         }
 
+        public async Task EditRole(UserRole userRole,CancellationToken cancellationToken)
+        {
+            var existingUserRole = await _context.UserRoles.FirstOrDefaultAsync(s =>  s.UserId == userRole.UserId,cancellationToken);
+            if (existingUserRole != null)
+            {
+                // فقط اگر نقش تغییر کرده باشد به‌روزرسانی کن
+                if (existingUserRole.RoleId != userRole.RoleId)
+                {
+                    //existingUserRole.RoleId = userRole.RoleId;
+                    //_context.UserRoles.Update(existingUserRole);
+                    _context.UserRoles.Remove(existingUserRole);
+                    await _context.UserRoles.AddAsync(userRole, cancellationToken);
 
-     
+                }
+            }
+            else
+            {
+                await _context.UserRoles.AddAsync(userRole, cancellationToken);
+            }
+        }
+
+
+     //public async Task UpdateUser(string userId,string fullName,string password,string userName,string mobileNumber,bool isActive,bool isChangePasssword,CancellationToken cancellationToken)
+     //   {
+     //       var user = await GetByUserIdAsync(userId, cancellationToken);
+     //       user.FullName = fullName;
+     //       user.Username = userName;
+     //       if (isChangePasssword==false)
+     //       {
+     //           user.PasswordHash = password ?? string.Empty;
+     //       }
+     //       user.IsActive = isActive;
+     //       user.MobileNumber = mobileNumber;
+     //   }
 
 
         public async Task UpdateAsync(User user)
@@ -164,17 +199,17 @@ namespace JWTApi.Infrastructure.Repositories
         }
 
 
-        public async Task<List<MenuUi>> GetUserMenuPermissionsForUiAsync(string userId, CancellationToken cancellationToken)
+        public async Task<List<MenuUi>> GetUserMenuPermissionsForUiAsync(string userId,string roleId, CancellationToken cancellationToken)
         {
-            // نقش‌های کاربر
-            var userRoleIds = await _context.UserRoles
-                .Where(ur => ur.UserId.ToString() == userId)
-                .Select(ur => ur.RoleId)
-                .ToListAsync(cancellationToken);
+          
 
-            // گرفتن منوها و دسترسی‌ها
-            var menuPermissions = await _context.Menus.Where(s=>s.IsMenu==true && s.ParentId ==null)
-                .Select(menu => new MenuUi
+          
+            var roleGuid = Guid.Parse(roleId);
+
+            var menuPermissions = await _context.Roles
+                .Where(r => r.Id == roleGuid)
+                .SelectMany(r => r.RoleMenus.Select(rm => rm.Menu))
+                .Where(m => m.ParentId == null).Select(menu => new MenuUi
                 {
                     Id = menu.Id,
                     Path = menu.Path,
@@ -182,7 +217,9 @@ namespace JWTApi.Infrastructure.Repositories
                     Icon = menu.Icon,
 
                 })
-                .ToListAsync(cancellationToken);
+                .ToListAsync();
+
+ 
 
             return menuPermissions;
         }
@@ -309,7 +346,8 @@ namespace JWTApi.Infrastructure.Repositories
         }
         public async Task<bool> checkUserNameDublicatedUpdate(string userName,string userId, CancellationToken cancellationToken)
         {
-            return await _context.Users.AnyAsync(s => s.Username == userName && s.Id.ToString()!=userId);
+            var t= await _context.Users.AnyAsync(s => s.Username == userName && s.Id.ToString()!=userId);
+            return t;
         }
         public async Task<bool> checkMobileDublicatedUpdate(string mobileNumber, string userId, CancellationToken cancellationToken)
         {

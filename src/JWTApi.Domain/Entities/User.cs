@@ -19,9 +19,10 @@ namespace JWTApi.Domain.Entities
         public bool IsActive { get; set; } = true;
 
         public string? RefreshToken { get; set; }
+        public int TokenVersion { get; set; } = 1; // فیلد جدید برای نسخه‌بندی توکن
         public DateTime? RefreshTokenExpiryTime { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-
+        public DateTime? UpdatedAt { get; set; }
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<Todo> Todos { get; set; } = new List<Todo>();
         //public ICollection<Project> Projects { get; set; } = new List<Project>();
@@ -37,7 +38,34 @@ namespace JWTApi.Domain.Entities
             Username = username;
             Email = email;
         }
+        public void UpdateUserInfo(string fullName, string userName, string mobileNumber, bool isActive)
+        {
+            Username = userName;
+            FullName = fullName;
+            MobileNumber = mobileNumber;
+            // اگر کاربر از فعال به غیرفعال تغییر کند
+            if (IsActive && !isActive)
+            {
+                IncrementTokenVersion(); // باطل کردن تمام توکن‌ها
+            }
 
+            IsActive = isActive;
+        }
+        // متد برای افزایش نسخه توکن (باطل کردن تمام توکن‌ها)
+        public void IncrementTokenVersion()
+        {
+            TokenVersion++;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        // متد برای تغییر رمز عبور
+        public void ChangePassword(string passwordHash)
+        {
+            if (!string.IsNullOrEmpty(passwordHash))
+            {
+                PasswordHash = passwordHash;
+            }
+        }
         public User(string username, string email, bool isActive,string mobileNumber,string fullName)
         {
             Id = Guid.NewGuid();
@@ -48,7 +76,17 @@ namespace JWTApi.Domain.Entities
             FullName = fullName;
 
         }
+        public User(string userId,string username, string email, bool isActive, string mobileNumber, string fullName)
+        {
+           
+            Username = username;
+            Email = email;
+            MobileNumber = mobileNumber;
 
+            IsActive = isActive;
+            FullName = fullName;
+
+        }
         public void SetPassword(string hash)
         {
             PasswordHash = hash;

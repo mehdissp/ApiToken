@@ -3,6 +3,7 @@ using JWTApi.Domain.Dtos;
 using JWTApi.Domain.Dtos.ProjectUsers;
 using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
+using JWTApi.Domain.Interfaces.TokenBlacklist;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -17,11 +18,13 @@ namespace JWTApi.Application.Services
         private readonly IUserRepository _userRepo;
         private readonly IUnitOfWork _unit;
         private readonly IPasswordHasher<User> _hasher;
-        public UserService(IUserRepository userRepository, IPasswordHasher<User> hasher, IUnitOfWork unit)
+        private readonly ITokenBlacklistRepository _tokenBlacklistRepository;
+        public UserService(IUserRepository userRepository, ITokenBlacklistRepository tokenBlacklistRepository, IPasswordHasher<User> hasher, IUnitOfWork unit)
         {
             _userRepo = userRepository;
             _hasher = hasher;
             _unit = unit;
+            _tokenBlacklistRepository = tokenBlacklistRepository;
         }
         public async Task<(bool Success, string Message)> RegisterAsync(RegisterNewUserDto dto, string userId, CancellationToken cancellationToken)
         {
@@ -39,18 +42,34 @@ namespace JWTApi.Application.Services
 
         public async Task<(bool Success, string Message)> UpdateUserAsync(UpdateNewUserDto dto, string userId, CancellationToken cancellationToken)
         {
-            if (await _userRepo.checkUserNameDublicatedUpdate(dto.Username,dto.UserId, cancellationToken) != null)
+            if (!Guid.TryParse(dto.UserId, out Guid userGuidId))
+                return (false, "Invalid user ID format");
+
+            if (!Guid.TryParse(dto.RoleId, out Guid roleGuidId))
+                return (false, "Invalid role ID format");
+            if (await _userRepo.checkUserNameDublicatedUpdate(dto.Username,dto.UserId, cancellationToken))
                 return (false, "User already exists");
             if (await _userRepo.checkMobileDublicatedUpdate(dto.MobileNumber,dto.UserId, cancellationToken) == true)
                 return (false, "MobileNumber already exists");
             var user = await _userRepo.GetByUserIdAsync(dto.UserId,cancellationToken);
+            if (user == null)
+                return (false, "User not found");
+            user.UpdateUserInfo(dto.fullname, dto.Username, dto.MobileNumber, dto.IsActive);
+            if ( !dto.IsActive)
+            {
+                await _tokenBlacklistRepository.BlacklistAllUserTokensAsync(userId);
+            }
             if (dto.IsChangePassword==true)
             {
                 user.SetPassword(_hasher.HashPassword(user, dto.Password));
             }
-            user =new User(dto.Username,dto.Email,dto.IsActive,dto.MobileNumber,dto.fullname)
-    ;
-            
+            UserRole userRole = new UserRole()
+            {
+                UserId = userGuidId,
+                RoleId = roleGuidId
+            };
+
+            await _userRepo.EditRole(userRole,cancellationToken);
             await _unit.SaveChanges(cancellationToken);
             return (true, "User created successfully");
         }

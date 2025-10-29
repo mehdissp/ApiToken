@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 
 using JWTApi.Api.ViewModels;
+using JWTApi.Domain.Entities;
 
 namespace JWTApi.API.Controllers
 {
@@ -112,11 +113,14 @@ namespace JWTApi.API.Controllers
         {
             // گرفتن UserId از Claim توکن
             var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var roleId = User.Claims.FirstOrDefault(c => c.Type == "roleId")?.Value;
+
+            
             var test = User.Claims;
             if (userId == null)
                 return Unauthorized();
 
-            var user = await _authService.GetUserMenuPermissionsForUiAsync(userId, cancellationToken);
+            var user = await _authService.GetUserMenuPermissionsForUiAsync(userId, roleId, cancellationToken);
             if (user == null)
                 return NotFound();
 

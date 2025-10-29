@@ -267,11 +267,13 @@ using JWTApi.Domain.Interfaces;
 using JWTApi.Domain.Interfaces.Comments;
 using JWTApi.Domain.Interfaces.Menus;
 using JWTApi.Domain.Interfaces.Roles;
+using JWTApi.Domain.Interfaces.TokenBlacklist;
 using JWTApi.Infrastructure.Data;
 using JWTApi.Infrastructure.Repositories;
 using JWTApi.Infrastructure.Repositories.Comments;
 using JWTApi.Infrastructure.Repositories.Menus;
 using JWTApi.Infrastructure.Repositories.Roles;
+using JWTApi.Infrastructure.Repositories.TokenBlacklist;
 using JWTApi.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -346,6 +348,7 @@ static void ConfigureDependencies(WebApplicationBuilder builder)
     builder.Services.AddScoped<IComment, CommentRepository>();
     builder.Services.AddScoped<IRoleRespository, RoleRepository>();
     builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+    builder.Services.AddScoped<ITokenBlacklistRepository, TokenBlacklistRepository>();
 
     // Services
     builder.Services.AddScoped<TodoService>();
@@ -440,6 +443,7 @@ static void ConfigureMiddlewarePipeline(WebApplication app)
 
     // Security Middleware
     app.UseCors("AllowReactApp");
+    app.UseMiddleware<TokenValidationMiddleware>();
     app.UseAuthentication();
     app.UseAuthorization();
 

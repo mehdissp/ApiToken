@@ -19,7 +19,7 @@ namespace JWTApi.Domain.Interfaces
         Task<List<MenuPermissionDto>> GetUserMenuPermissionsAsync(string userId,CancellationToken cancellationToken);
          Task AddLoginAttemptAsync(LoginAttempt loginAttempt, CancellationToken cancellationToken);
         Task CheckAndLockIp(string? ip);
-        Task<List<MenuUi>> GetUserMenuPermissionsForUiAsync(string userId, CancellationToken cancellationToken);
+        Task<List<MenuUi>> GetUserMenuPermissionsForUiAsync(string userId,string roleId, CancellationToken cancellationToken);
         Task AddUserWithAnotherUsers(User user, string userId,string roleId, CancellationToken cancellationToken);
         Task<PagedResult<User>> GetUsersAsync(string userId, int pageNumber, int pageSize, CancellationToken cancellationToken);
         Task<bool> checkUserNameDublicated(string userName, CancellationToken cancellationToken);
@@ -29,6 +29,9 @@ namespace JWTApi.Domain.Interfaces
         Task<List<Role>> GetRoleCombo(CancellationToken cancellationToken);
 
         Task<PagedResult<ProjectUserDtos>> GetProjectUserDtos(string userId, int projectId, int pageNumber, int pageSize, CancellationToken cancellationToken);
+
+        Task EditRole(UserRole userRole, CancellationToken cancellationToken);
+        Task<User?> GetByUserIdAsyncForToken(string userId);
 
 
     }
