@@ -29,8 +29,9 @@ namespace JWTApi.Api.Controllers
         public async Task<IActionResult> GetTodoStatus([FromQuery] int projectId, CancellationToken cancellationToken)
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            var result = await _todoStatus.GetTodoStatusesAsync(projectId,cancellationToken);
-            var todo = await _todo.TodoWithTagsViewsAsync(userId, cancellationToken);
+            var roleId = User.Claims.FirstOrDefault(c => c.Type == "roleId")?.Value;
+            var result = await _todoStatus.GetTodoStatusesAsync(projectId, roleId, cancellationToken);
+            var todo = await _todo.TodoWithTagsViewsAsync(userId, roleId, cancellationToken);
             var results = new
             {
                 Columns = result.Select(s => new
@@ -39,6 +40,10 @@ namespace JWTApi.Api.Controllers
                     Title = s.Name,
                     Color = s.Color,
                     OrderNum = s.OrderNum,
+                    deleteTodoStatus = s.DeleteTodoStatus,
+                    editTodoStatus = s.EditTodoStatus,
+                    insertTodoStatus = s.InsertTodoStatus,
+                    viewTodoStatus = s.ViewTodoStatus,
                     Tasks = todo.Where(t => t.StatusId == s.Id).Select(t => new
                     {
                         Id = t.Id,
@@ -54,7 +59,11 @@ namespace JWTApi.Api.Controllers
                         CountComment=t.CountComment,
                         IsOverdute=t.IsOverdute,
                         deleteButton=t.DeleteButton,
-                        editButton=t.EditButton
+                        editButton=t.EditButton,
+                        //deleteTodoStatus=t.DeleteTodoStatus,
+                        //editTodoStatus = t.EditTodoStatus,
+                        //insertTodoStatus = t.InsertTodoStatus,
+                        //viewTodoStatus = t.ViewTodoStatus,
 
                     })
                 }).OrderBy(c => c.OrderNum)

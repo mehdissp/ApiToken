@@ -292,6 +292,7 @@ namespace JWTApi.Infrastructure.Repositories
         //        };
         //    }
 
+        
         public async Task<PagedResult<User>> GetUsersAsync(string userId, int pageNumber, int pageSize, CancellationToken cancellationToken)
         {
             // تبدیل userId به Guid
@@ -336,6 +337,39 @@ namespace JWTApi.Infrastructure.Repositories
                 Max = currentUserPackage.MaxUsers
             };
         }
+
+        public async Task<PagedResult<User>> GetUsersForComboAsync(string userId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        {
+            // تبدیل userId به Guid
+            if (!Guid.TryParse(userId, out var userGuid))
+            {
+                throw new ArgumentException("Invalid user ID format");
+            }
+
+         
+
+            // کوئری برای گرفتن کاربران تحت مدیریت
+            var query = _context.Users
+           
+                .Where(u => u.UserId == userGuid && u.IsActive==true) ; 
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return new PagedResult<User>
+            {
+                Items = users,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                Max = 0
+            };
+        }
+
         public async Task<bool> checkUserNameDublicated(string userName,CancellationToken cancellationToken)
         {
             return await _context.Users.AnyAsync(s => s.Username == userName);

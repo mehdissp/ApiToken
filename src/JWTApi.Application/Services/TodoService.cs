@@ -61,9 +61,9 @@ namespace JWTApi.Application.Services
         }
 
 
-        public async Task<List<TodoWithTagsView>> TodoWithTagsViewsAsync(string userId,CancellationToken cancellationToken)
+        public async Task<List<TodoWithTagsView>> TodoWithTagsViewsAsync(string userId,string roleId, CancellationToken cancellationToken)
         {
-            return await _todo.GetTodosWithTags(userId, cancellationToken);
+            return await _todo.GetTodosWithTags(userId, roleId, cancellationToken);
         }
 
         public async Task UpdateTodoWithStatusId(int id,string userId,int statusId,CancellationToken cancellation)

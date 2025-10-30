@@ -33,6 +33,8 @@ namespace JWTApi.Domain.Interfaces
         Task EditRole(UserRole userRole, CancellationToken cancellationToken);
         Task<User?> GetByUserIdAsyncForToken(string userId);
 
+        Task<PagedResult<User>> GetUsersForComboAsync(string userId, int pageNumber, int pageSize, CancellationToken cancellationToken);
+
 
     }
 }

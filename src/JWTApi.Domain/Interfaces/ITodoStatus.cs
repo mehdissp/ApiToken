@@ -1,4 +1,5 @@
-﻿using JWTApi.Domain.Entities;
+﻿using JWTApi.Domain.Dtos.TodoStatus;
+using JWTApi.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace JWTApi.Domain.Interfaces
 {
     public interface ITodoStatus
     {
-        Task<List<TodoStatus>> GetTodoStatus(int projectId, CancellationToken cancellationToken);
+        Task<List<TodoStatusDtos>> GetTodoStatus(int projectId, string roleId, CancellationToken cancellationToken);
         Task InsertTodoStatus(int projectId, string name, string color, CancellationToken cancellationToken);
         Task UpdateTodoStatus(int id, string name, string color, int? orderNum, CancellationToken cancellationToken);
         Task DeleteTodoStatus(int id, CancellationToken cancellationToken);

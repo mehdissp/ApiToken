@@ -60,7 +60,8 @@ namespace JWTApi.Api.Controllers
         public async Task<IActionResult> GetTodoWithTagsViewsAsync( CancellationToken cancellationToken)
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            var result = await _todoService.TodoWithTagsViewsAsync(userId, cancellationToken);
+            var roleId = User.Claims.FirstOrDefault(c => c.Type == "roleId")?.Value;
+            var result = await _todoService.TodoWithTagsViewsAsync(userId, roleId, cancellationToken);
 
             return ResponseApi.Ok(result).ToHttpResponse();
 

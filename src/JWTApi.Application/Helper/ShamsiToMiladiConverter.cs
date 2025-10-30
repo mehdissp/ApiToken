@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Text;
 
 public class ShamsiToMiladiConverter
 {
@@ -11,9 +12,9 @@ public class ShamsiToMiladiConverter
         if (parts.Length != 3)
             throw new ArgumentException("فرمت تاریخ نامعتبر است");
 
-        int year = int.Parse(parts[0]);
-        int month = int.Parse(parts[1]);
-        int day = int.Parse(parts[2]);
+        int year = int.Parse(ConvertToWesternNumerals(parts[0]));
+        int month = int.Parse(ConvertToWesternNumerals(parts[1]));
+        int day = int.Parse(ConvertToWesternNumerals(parts[2]));
 
         // ایجاد شیء PersianCalendar
         PersianCalendar pc = new PersianCalendar();
@@ -22,6 +23,25 @@ public class ShamsiToMiladiConverter
         DateTime miladiDate = pc.ToDateTime(year, month, day, 0, 0, 0, 0);
 
         return miladiDate;
+    }
+
+    private static string ConvertToWesternNumerals(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return input;
+
+        StringBuilder result = new StringBuilder();
+        foreach (char c in input)
+        {
+            // تبدیل اعداد فارسی و عربی به انگلیسی
+            if (c >= '۰' && c <= '۹') // اعداد فارسی
+                result.Append((char)('0' + (c - '۰')));
+            else if (c >= '٠' && c <= '٩') // اعداد عربی
+                result.Append((char)('0' + (c - '٠')));
+            else
+                result.Append(c);
+        }
+        return result.ToString();
     }
 }
 

@@ -33,9 +33,9 @@ namespace JWTApi.Infrastructure.Repositories
         }
 
      
-        public async Task<List<TodoWithTagsView>> GetTodosWithTags(string userId, CancellationToken cancellationToken)
+        public async Task<List<TodoWithTagsView>> GetTodosWithTags(string userId,string roleId, CancellationToken cancellationToken)
         {
-
+     
             // حالا کوئری اصلی
             var result = await _context.Todos
                 .Include(t => t.TodoTags)
@@ -65,6 +65,7 @@ namespace JWTApi.Infrastructure.Repositories
                     DeleteButton=t.UserId.ToString()== userId ?true :false,
                     EditButton = t.UserId.ToString() == userId ? true : false,
                     CountComment =_context.Comments.Where(s=>s.TodoId==t.Id && s.IsDeleted==false).Count(),
+
 
                     IsOverdute = t.DueDate == null ? 0 :
                         t.DueDate <= DateTime.Now.AddDays(1) ? 1 :
@@ -164,7 +165,7 @@ namespace JWTApi.Infrastructure.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-      
+
 
     }
 }

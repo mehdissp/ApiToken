@@ -1,4 +1,5 @@
-﻿using JWTApi.Domain.Entities;
+﻿using JWTApi.Domain.Dtos.TodoStatus;
+using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -17,9 +18,9 @@ namespace JWTApi.Application.Services
             _todoStatus = todoStatus;
             _unit = unit;
         }
-        public async Task<List<TodoStatus>> GetTodoStatusesAsync(int projectId,CancellationToken cancellationToken)
+        public async Task<List<TodoStatusDtos>> GetTodoStatusesAsync(int projectId,string roleId, CancellationToken cancellationToken)
         {
-            return await _todoStatus.GetTodoStatus(projectId, cancellationToken);
+            return await _todoStatus.GetTodoStatus(projectId, roleId, cancellationToken);
         }
         public async Task InsertTodoStatus(int projectId,string name,string color,CancellationToken cancellationToken)
         {

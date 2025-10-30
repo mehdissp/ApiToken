@@ -12,7 +12,7 @@ namespace JWTApi.Domain.Interfaces
         Task<Todo> InsertTodo(Todo todo, CancellationToken cancellationToken);
         Task InsertTodoTags(List<TodoTag> todo, CancellationToken cancellationToken);
         Task DeleteAsync(int id, string userId, CancellationToken cancellationToken);
-        Task<List<TodoWithTagsView>> GetTodosWithTags(string userId, CancellationToken cancellationToken);
+        Task<List<TodoWithTagsView>> GetTodosWithTags(string userId,string roleId, CancellationToken cancellationToken);
         Task<Todo?> GetTodoAsync(int id, CancellationToken cancellation);
         Task UpdateTodoWithStatusId(int id, int statusId, CancellationToken cancellationToken);
         Task UpdateTodo(int id, string title, string desc, int statusId, string userIdTodo, int priority

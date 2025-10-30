@@ -59,7 +59,7 @@ namespace JWTApi.Api.Controllers
         public async Task<IActionResult> GetUsersCombo([FromBody] PageSizeViewModel pageSize, CancellationToken cancellationToken)
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            var result = await _userService.GetNewUser(userId, pageSize.PageNumber, pageSize.PageSize, cancellationToken);
+            var result = await _userService.GetUsersForComboAsync(userId, pageSize.PageNumber, pageSize.PageSize, cancellationToken);
             var response = new
             {
                 Items = result.Items,

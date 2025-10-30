@@ -1,4 +1,5 @@
 ﻿using JWTApi.Domain.Dtos;
+using JWTApi.Domain.Dtos.TodoStatus;
 using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
 using JWTApi.Infrastructure.Data;
@@ -31,10 +32,42 @@ namespace JWTApi.Infrastructure.Repositories
 
         }
 
-        public async Task<List<TodoStatus>> GetTodoStatus(int projectId, CancellationToken cancellationToken)
+        public async Task<List<TodoStatusDtos>> GetTodoStatus(int projectId,string roleId, CancellationToken cancellationToken)
         {
-            var t= await _context.TodoStatuses.Where(s => s.ProjectId == projectId && s.IsDeleted==false).OrderBy(s=>s.OrderNum).ToListAsync(cancellationToken);
+            var checkDeleteTodoStatus = await HasMenuAccessAsync(roleId, "/api/TodoStatus/DeleteTodoStatus", cancellationToken);
+            var checkEditTodoStatus = await HasMenuAccessAsync(roleId, "/api/TodoStatus/UpdateTodoStatus", cancellationToken);
+            var checkInsertTodoStatus = await HasMenuAccessAsync(roleId, "/api/TodoStatus/InsertTodoStatus", cancellationToken);
+            var checkViewTodoStatus = await HasMenuAccessAsync(roleId, "/api/TodoStatus/GetTodoStatus", cancellationToken);
+
+            var t = await _context.TodoStatuses.Where(s => s.ProjectId == projectId && s.IsDeleted==false).OrderBy(s=>s.OrderNum)
+                .Select(s=>new TodoStatusDtos
+                {
+                    Id=s.Id,
+                    ProjectId=s.ProjectId,
+                    Color=s.Color,
+                    Name=s.Name,
+                    CreatedAt=s.CreatedAt,
+                    OrderNum=s.OrderNum,
+                    ViewTodoStatus= checkViewTodoStatus,
+                    DeleteTodoStatus= checkDeleteTodoStatus,
+                    EditTodoStatus= checkEditTodoStatus,
+                    InsertTodoStatus= checkInsertTodoStatus,
+                    
+
+                } )
+                .ToListAsync(cancellationToken);
             return t;
+        }
+        private async Task<bool> HasMenuAccessAsync(string roleId, string menuUrl, CancellationToken cancellationToken)
+        {
+            var menu = await _context.Menus
+                .Where(s => s.Url == menuUrl)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (menu == null) return false;
+
+            return await _context.RoleMenus
+                .AnyAsync(s => s.RoleId.ToString() == roleId && s.MenuId == menu.Id, cancellationToken);
         }
 
         public async Task<TodoStatus> GetAsync(int id ,CancellationToken cancellationToken)

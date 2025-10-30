@@ -104,6 +104,37 @@ namespace JWTApi.Application.Services
             };
         }
 
+
+        public async Task<PagedResult<GetNewUserDto>> GetUsersForComboAsync(string userId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        {
+            var result = await _userRepo.GetUsersForComboAsync(userId, pageNumber, pageSize, cancellationToken);
+
+            var users = result.Items.Select(user =>
+            {
+                var userRole = user.UserRoles.FirstOrDefault();
+                return new GetNewUserDto(
+                    Id: user.Id,
+                    Username: user.Username,
+                    Email: user.Email,
+                    IsActive: user.IsActive,
+                    MobileNumber: user.MobileNumber,
+                    createdAt: user.CreatedAt,
+                    fullname: user.FullName,
+                    roleId: userRole?.Role?.Id.ToString() ?? string.Empty,
+                    roleName: userRole?.Role?.Name ?? string.Empty
+                );
+            }).ToList();
+
+            return new PagedResult<GetNewUserDto>
+            {
+                Items = users,
+                TotalCount = result.TotalCount,
+                PageNumber = result.PageNumber,
+                PageSize = result.PageSize,
+                Max = result.Max
+            };
+        }
+
         public async Task<List<Role>> GetRole(CancellationToken cancellationToken)
         {
             return await _userRepo.GetRoleCombo(cancellationToken);

@@ -19,6 +19,8 @@ public class TodoWithTagsView
     public int? IsOverdute { get; set; }
     public bool DeleteButton { get; set; }
     public bool EditButton { get; set; }
+
+
     public List<TagDto> Tags { get; set; } = new List<TagDto>();
 }
 
