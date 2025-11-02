@@ -18,5 +18,6 @@ namespace JWTApi.Domain.Entities
         public ICollection<Todo> Todos { get; set; } = new List<Todo>();
         public ICollection<TodoStatus> TodoStatuses { get; set; } = new List<TodoStatus>();
         public ICollection<ProjectUser> ProjectUsers { get; set; } = new List<ProjectUser>();
+        public ICollection<TagProject> TagProjects { get; set; } = new List<TagProject>();
     }
 }

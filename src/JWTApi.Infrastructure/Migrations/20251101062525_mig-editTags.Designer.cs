@@ -4,6 +4,7 @@ using JWTApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JWTApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251101062525_mig-editTags")]
+    partial class migeditTags
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -432,18 +435,10 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Property<string>("DescriptionRows")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdateAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -451,21 +446,6 @@ namespace JWTApi.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tags");
-                });
-
-            modelBuilder.Entity("JWTApi.Domain.Entities.TagProject", b =>
-                {
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TagId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProjectId", "TagId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("TagProjects");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Todo", b =>
@@ -802,25 +782,6 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("JWTApi.Domain.Entities.TagProject", b =>
-                {
-                    b.HasOne("JWTApi.Domain.Entities.Project", "Project")
-                        .WithMany("TagProjects")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JWTApi.Domain.Entities.Tag", "Tag")
-                        .WithMany("TagProjects")
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-
-                    b.Navigation("Tag");
-                });
-
             modelBuilder.Entity("JWTApi.Domain.Entities.Todo", b =>
                 {
                     b.HasOne("JWTApi.Domain.Entities.Project", null)
@@ -929,8 +890,6 @@ namespace JWTApi.Infrastructure.Migrations
                 {
                     b.Navigation("ProjectUsers");
 
-                    b.Navigation("TagProjects");
-
                     b.Navigation("TodoStatuses");
 
                     b.Navigation("Todos");
@@ -947,8 +906,6 @@ namespace JWTApi.Infrastructure.Migrations
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Tag", b =>
                 {
-                    b.Navigation("TagProjects");
-
                     b.Navigation("TodoTags");
                 });
 

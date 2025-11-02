@@ -262,17 +262,20 @@ using JWTApi.Application.Services;
 using JWTApi.Application.Services.Comments;
 using JWTApi.Application.Services.Menus;
 using JWTApi.Application.Services.Roles;
+using JWTApi.Application.Services.Tags;
 using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
 using JWTApi.Domain.Interfaces.Comments;
 using JWTApi.Domain.Interfaces.Menus;
 using JWTApi.Domain.Interfaces.Roles;
+using JWTApi.Domain.Interfaces.Tags;
 using JWTApi.Domain.Interfaces.TokenBlacklist;
 using JWTApi.Infrastructure.Data;
 using JWTApi.Infrastructure.Repositories;
 using JWTApi.Infrastructure.Repositories.Comments;
 using JWTApi.Infrastructure.Repositories.Menus;
 using JWTApi.Infrastructure.Repositories.Roles;
+using JWTApi.Infrastructure.Repositories.Tags;
 using JWTApi.Infrastructure.Repositories.TokenBlacklist;
 using JWTApi.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -349,6 +352,7 @@ static void ConfigureDependencies(WebApplicationBuilder builder)
     builder.Services.AddScoped<IRoleRespository, RoleRepository>();
     builder.Services.AddScoped<IMenuRepository, MenuRepository>();
     builder.Services.AddScoped<ITokenBlacklistRepository, TokenBlacklistRepository>();
+    builder.Services.AddScoped<ITagRepository, TagRepository>();
 
     // Services
     builder.Services.AddScoped<TodoService>();
@@ -361,6 +365,8 @@ static void ConfigureDependencies(WebApplicationBuilder builder)
     builder.Services.AddScoped<UserService>();
     builder.Services.AddScoped<ProjectService>();
     builder.Services.AddScoped<TodoStatusService>();
+
+    builder.Services.AddScoped<TagService>();
 
     // Identity
     builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

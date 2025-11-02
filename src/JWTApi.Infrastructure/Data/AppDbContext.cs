@@ -33,8 +33,9 @@ namespace JWTApi.Infrastructure.Data
 
         public DbSet<Comment> Comments { get; set; }
         public DbSet<ProjectUser> ProjectUsers { get; set; }
+        public DbSet<TagProject> TagProjects { get; set; }
 
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -178,6 +179,8 @@ namespace JWTApi.Infrastructure.Data
             {
                 b.HasKey(tag => tag.Id);
                 b.Property(tag => tag.Name).HasMaxLength(100).IsRequired();
+                b.Property(r => r.IsDeleted).HasDefaultValue(false);
+                b.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()");
             });
 
             // ---------------- TodoTag (Many-to-Many) ----------------
@@ -193,6 +196,20 @@ namespace JWTApi.Infrastructure.Data
 
                 b.HasOne(tt => tt.Tag)
                  .WithMany(t => t.TodoTags)
+                 .HasForeignKey(tt => tt.TagId);
+
+            });
+            //-----------------TagProject ---------------
+            modelBuilder.Entity<TagProject>(b =>
+            {
+                b.HasKey(tt => new { tt.ProjectId, tt.TagId });
+
+                b.HasOne(tt => tt.Project)
+                 .WithMany(t => t.TagProjects)
+                 .HasForeignKey(tt => tt.ProjectId);
+
+                b.HasOne(tt => tt.Tag)
+                 .WithMany(t => t.TagProjects)
                  .HasForeignKey(tt => tt.TagId);
 
             });
