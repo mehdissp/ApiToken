@@ -88,20 +88,34 @@ namespace JWTApi.Infrastructure.Repositories.Tags
 
         public async Task<PagedResult<TagProjectDtos>> GetTagProjectDtos(string userId, int projectId, int pageNumber, int pageSize, CancellationToken cancellationToken)
         {
-            var baseQuery = from u in _context.Tags
-                            join r in _context.TagProjects on u.Id equals r.TagId into projectTags
-                            from ur in projectTags.DefaultIfEmpty()
-                            join q in _context.Projects on ur.ProjectId equals q.Id into projects
-                            from role in projects.DefaultIfEmpty()
-                            where (u.UserId.ToString() == GetUserIdManager(userId) || u.UserId.ToString()== userId)
-                            && u.Id.ToString() != userId
-                            select new TagProjectDtos
-                            {
-                                Id = u.Id,
-                                TagName = u.Name,
-                                Color = u.Color,
-                                IsCheck = _context.TagProjects.Any(pu => pu.TagId == u.Id && pu.ProjectId == projectId)
-                            };
+            //var baseQuery = from u in _context.Tags
+            //                join r in _context.TagProjects on u.Id equals r.TagId into projectTags
+            //                from ur in projectTags.DefaultIfEmpty()
+            //                join q in _context.Projects on ur.ProjectId equals q.Id into projects
+            //                from role in projects.DefaultIfEmpty()
+            //                where (u.UserId.ToString() == GetUserIdManager(userId) || u.UserId.ToString()== userId)
+            //                && u.Id.ToString() != userId
+            //                select new TagProjectDtos
+            //                {
+            //                    Id = u.Id,
+            //                    TagName = u.Name,
+            //                    Color = u.Color,
+            //                    IsCheck = _context.TagProjects.Any(pu => pu.TagId == u.Id && pu.ProjectId == projectId)
+            //                };
+            var userGuid = Guid.Parse(userId);
+            var managerGuid = Guid.Parse(GetUserIdManager(userId));
+
+            var baseQuery = _context.Tags
+                .Where(u => (u.UserId == userGuid || u.UserId == managerGuid ) && u.IsDeleted==false
+                           )
+                .Select(u => new TagProjectDtos
+                {
+                    Id = u.Id,
+                    TagName = u.Name,
+                    Color = u.Color,
+                    IsCheck = u.TagProjects.Any(pu => pu.ProjectId == projectId)
+                })
+                .Distinct();
 
             // گرفتن تعداد کل رکوردها
             var totalCount = await baseQuery.CountAsync(cancellationToken);

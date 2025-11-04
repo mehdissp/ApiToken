@@ -232,6 +232,50 @@ namespace JWTApi.Infrastructure.Repositories
             }
         }
 
+
+        public async Task InsertOrDeleteTagInProject(List<TagProject> tagProjects, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // گرفتن اولین ProjectId برای فیلتر کردن (فرض می‌کنیم همه آیتم‌ها ProjectId یکسان دارند)
+                var firstProjectId = tagProjects.First().ProjectId;
+
+                // موجودی فعلی از دیتابیس
+                var existingProjectUsers = await _context.TagProjects
+                    .Where(pu => pu.ProjectId == firstProjectId)
+                    .ToListAsync(cancellationToken);
+
+                // پیدا کردن مواردی برای حذف (در دیتابیس هستند ولی در لیست جدید نیستند)
+                // اما فقط آنهایی که IsCreator == false دارند
+                var toDelete = existingProjectUsers
+                    .Where(epu => !tagProjects.Any(npu =>
+                        npu.ProjectId == epu.ProjectId && npu.TagId == epu.TagId)
+                        ) // فقط مواردی که IsCreator false هستند
+                    .ToList();
+
+                // پیدا کردن مواردی برای اضافه کردن (در لیست جدید هستند ولی در دیتابیس نیستند)
+                var toAdd = tagProjects
+                    .Where(npu => !existingProjectUsers.Any(epu =>
+                        epu.ProjectId == npu.ProjectId && epu.TagId == npu.TagId))
+                    .ToList();
+
+                // اجرای عملیات
+                if (toDelete.Any())
+                {
+                    _context.TagProjects.RemoveRange(toDelete);
+                }
+
+                if (toAdd.Any())
+                {
+                    await _context.TagProjects.AddRangeAsync(toAdd, cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public async Task DeleteProjectUser(int  projectId, CancellationToken cancellationToken)
         {
             try
@@ -241,6 +285,25 @@ namespace JWTApi.Infrastructure.Repositories
                 var deleteRoleMenu = _context.ProjectUsers.Where(s => s.ProjectId== projectId)
                     .ToList();
                 _context.ProjectUsers.RemoveRange(deleteRoleMenu);
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+        }
+
+        public async Task DeleteTagProject(int projectId, CancellationToken cancellationToken)
+        {
+            try
+            {
+
+                // پیدا کردن مواردی برای اضافه کردن (در لیست جدید هستند ولی در دیتابیس نیستند)
+                var deleteRoleMenu = _context.TagProjects.Where(s => s.ProjectId == projectId)
+                    .ToList();
+                _context.TagProjects.RemoveRange(deleteRoleMenu);
 
             }
             catch (Exception ex)

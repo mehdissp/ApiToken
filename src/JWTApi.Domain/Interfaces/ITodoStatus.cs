@@ -15,6 +15,6 @@ namespace JWTApi.Domain.Interfaces
         Task UpdateTodoStatus(int id, string name, string color, int? orderNum, CancellationToken cancellationToken);
         Task DeleteTodoStatus(int id, CancellationToken cancellationToken);
 
-        Task<List<Tag>> GetTags(CancellationToken cancellationToken);
+        Task<List<Tag>> GetTags(int projectId,CancellationToken cancellationToken);
     }
 }

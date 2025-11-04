@@ -143,9 +143,12 @@ namespace JWTApi.Infrastructure.Repositories
 
         }
 
-        public async Task<List<Tag>> GetTags(CancellationToken cancellationToken)
+        public async Task<List<Tag>> GetTags(int projectId, CancellationToken cancellationToken)
         {
-            return await _context.Tags.ToListAsync(cancellationToken);
+            return await _context.Tags
+                .Where(s => s.IsDeleted == false
+                        && _context.TagProjects.Any(d => d.ProjectId == projectId && d.TagId == s.Id))
+                .ToListAsync(cancellationToken);
         }
     }
 }

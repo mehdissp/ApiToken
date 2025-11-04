@@ -14,6 +14,7 @@ namespace JWTApi.Application.Helper
         public string? MobileNumber { get; set; }
         public string? FullName { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string Avatar { get; set; }
 
     }
 }

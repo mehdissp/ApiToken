@@ -279,10 +279,13 @@ using JWTApi.Infrastructure.Repositories.Tags;
 using JWTApi.Infrastructure.Repositories.TokenBlacklist;
 using JWTApi.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -304,7 +307,17 @@ ConfigureMiddlewarePipeline(app);
 ConfigureEndpoints(app);
 
 app.Run();
+// دیباگ مسیرها
+var contentRoot = Directory.GetCurrentDirectory();
+var wwwrootPath = Path.Combine(contentRoot, "wwwroot");
+var uploadsPath = Path.Combine(wwwrootPath, "uploads");
 
+Console.WriteLine("=== Path Debug Information ===");
+Console.WriteLine($"Content Root: {contentRoot}");
+Console.WriteLine($"WWWRoot Path: {wwwrootPath}");
+Console.WriteLine($"Uploads Path: {uploadsPath}");
+Console.WriteLine($"WWWRoot Exists: {Directory.Exists(wwwrootPath)}");
+Console.WriteLine($"Uploads Exists: {Directory.Exists(uploadsPath)}");
 // Configuration Methods
 static void ConfigureDatabase(WebApplicationBuilder builder)
 {
@@ -333,6 +346,12 @@ static void ConfigureCors(WebApplicationBuilder builder)
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
+        options.AddPolicy("AllowAll", builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
     });
 }
 
@@ -340,7 +359,7 @@ static void ConfigureDependencies(WebApplicationBuilder builder)
 {
     // Infrastructure
     builder.Services.AddMemoryCache();
-
+    builder.Services.AddHttpContextAccessor();
     // Repositories
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
@@ -401,6 +420,14 @@ static void ConfigureAuthentication(WebApplicationBuilder builder)
 
 static void ConfigureControllers(WebApplicationBuilder builder)
 {
+    // اضافه کردن این تنظیمات
+    builder.Services.Configure<FormOptions>(options =>
+    {
+        options.MultipartBodyLengthLimit = 104857600; // 100MB
+        options.MemoryBufferThreshold = 1024 * 1024 * 100; // 100MB
+        options.ValueLengthLimit = int.MaxValue;
+        options.MultipartBoundaryLengthLimit = int.MaxValue;
+    });
     builder.Services.AddControllers()
         .AddJsonOptions(options =>
         {
@@ -411,6 +438,11 @@ static void ConfigureControllers(WebApplicationBuilder builder)
 
 static void ConfigureSwagger(WebApplicationBuilder builder)
 {
+    // تنظیمات فایل‌های multipart
+    builder.Services.Configure<FormOptions>(options =>
+    {
+        options.MultipartBodyLengthLimit = 104857600; // 100MB
+    });
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>
     {
@@ -445,7 +477,20 @@ static void ConfigureMiddlewarePipeline(WebApplication app)
     }
 
     app.UseHttpsRedirection();
-    app.UseStaticFiles();
+    // مهم: UseStaticFiles باید قبل از UseRouting باشد
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(
+            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+        RequestPath = "",
+        OnPrepareResponse = ctx =>
+        {
+            var path = ctx.File.PhysicalPath;
+            // کش برای فایل‌های استاتیک
+            ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=3600"; // 1 hour
+            Console.WriteLine($"Serving static file: {path}");
+        }
+    });
 
     // Security Middleware
     app.UseCors("AllowReactApp");

@@ -16,6 +16,7 @@ namespace JWTApi.Domain.Entities
         public string MobileNumber { get; set; } = string.Empty;
         public string PasswordHash { get; private set; } = string.Empty;
         public Guid? UserId { get; set; }
+        public string Avatar { get; set; }
         public bool IsActive { get; set; } = true;
 
         public string? RefreshToken { get; set; }
@@ -56,6 +57,10 @@ namespace JWTApi.Domain.Entities
         {
             TokenVersion++;
             UpdatedAt = DateTime.UtcNow;
+        }
+        public void UpdateUserProfile(string avatar)
+        {
+            Avatar = avatar;
         }
 
         // متد برای تغییر رمز عبور

@@ -4,27 +4,31 @@ using JWTApi.Domain.Dtos.ProjectUsers;
 using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
 using JWTApi.Domain.Interfaces.TokenBlacklist;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace JWTApi.Application.Services
 {
     public class UserService
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUserRepository _userRepo;
         private readonly IUnitOfWork _unit;
         private readonly IPasswordHasher<User> _hasher;
         private readonly ITokenBlacklistRepository _tokenBlacklistRepository;
-        public UserService(IUserRepository userRepository, ITokenBlacklistRepository tokenBlacklistRepository, IPasswordHasher<User> hasher, IUnitOfWork unit)
+        public UserService(IUserRepository userRepository, IHttpContextAccessor httpContextAccessor, ITokenBlacklistRepository tokenBlacklistRepository, IPasswordHasher<User> hasher, IUnitOfWork unit)
         {
             _userRepo = userRepository;
             _hasher = hasher;
             _unit = unit;
             _tokenBlacklistRepository = tokenBlacklistRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<(bool Success, string Message)> RegisterAsync(RegisterNewUserDto dto, string userId, CancellationToken cancellationToken)
         {
@@ -143,6 +147,46 @@ namespace JWTApi.Application.Services
         public async Task<PagedResult<ProjectUserDtos>> GetProjectUserDtosAsync(string userId,int projectId,int pageNumber, int pageSize, CancellationToken cancellationToken)
         {
             return await _userRepo.GetProjectUserDtos(userId, projectId, pageNumber, pageSize, cancellationToken);
+        }
+
+        public async Task<string> UploadAvatarUser(string userId, IFormFile formFile, CancellationToken cancellation)
+        {
+            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads/users");
+            if (!Directory.Exists(uploadsPath))
+                Directory.CreateDirectory(uploadsPath);
+
+            // اگر کاربر فایل آواتار قبلی دارد، آن را حذف کن
+            var user = await _userRepo.GetByUserIdAsync(userId, cancellation);
+            if (!string.IsNullOrEmpty(user.Avatar))
+            {
+                // استخراج نام فایل از لینک کامل قبلی
+                var oldFileName = Path.GetFileName(user.Avatar);
+                if (!string.IsNullOrEmpty(oldFileName))
+                {
+                    var oldFilePath = Path.Combine(uploadsPath, oldFileName);
+                    if (File.Exists(oldFilePath))
+                    {
+                        File.Delete(oldFilePath);
+                    }
+                }
+            }
+
+            var fileName = $"{Guid.NewGuid()}_{formFile.FileName}";
+            var filePath = Path.Combine(uploadsPath, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await formFile.CopyToAsync(stream);
+            }
+
+            // ساخت لینک کامل
+            var baseUrl = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}";
+            var fullUrl = $"{baseUrl}/uploads/users/{fileName}";
+
+            user.UpdateUserProfile(fullUrl); // ذخیره لینک کامل
+            await _unit.SaveChanges(cancellation);
+
+            return fullUrl; // بازگشت لینک کامل
         }
 
     }

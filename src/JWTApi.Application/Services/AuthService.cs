@@ -121,7 +121,8 @@ namespace JWTApi.Application.Services
               //  ProfileImagePath = user.ProfileImagePath
               MobileNumber=user.MobileNumber,
               FullName=user.FullName,
-              CreatedAt=user.CreatedAt
+              CreatedAt=user.CreatedAt,
+              Avatar=user.Avatar
             };
         }
 

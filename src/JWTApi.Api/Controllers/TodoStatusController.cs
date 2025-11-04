@@ -118,10 +118,10 @@ namespace JWTApi.Api.Controllers
         }
 
         [HttpGet("GetTags")]
-        public async Task<IActionResult> GetTags( CancellationToken cancellationToken)
+        public async Task<IActionResult> GetTags([FromQuery] int projectId, CancellationToken cancellationToken)
         {
             //var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-            var result = await _todoStatus.GetTagsAsync( cancellationToken);
+            var result = await _todoStatus.GetTagsAsync(projectId, cancellationToken);
 
             return ResponseApi.Ok(result).ToHttpResponse();
 

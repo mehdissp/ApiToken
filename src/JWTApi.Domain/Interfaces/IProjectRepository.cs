@@ -24,6 +24,9 @@ namespace JWTApi.Domain.Interfaces
 
         Task InsertOrDeleteUserInProject(List<ProjectUser> projectUsers, CancellationToken cancellationToken);
 
+        Task InsertOrDeleteTagInProject(List<TagProject> tagProjects, CancellationToken cancellationToken);
+
         Task DeleteProjectUser(int projectId, CancellationToken cancellationToken);
+        Task DeleteTagProject(int projectId, CancellationToken cancellationToken);
     }
 }

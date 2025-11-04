@@ -4,6 +4,7 @@ using JWTApi.Api.ViewModels.Project;
 using JWTApi.Application.DTOs;
 using JWTApi.Application.DTOs.MenuAccess;
 using JWTApi.Application.DTOs.ProjectUsers;
+using JWTApi.Application.DTOs.TagProjects;
 using JWTApi.Application.Services;
 using JWTApi.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -73,6 +74,18 @@ namespace JWTApi.Api.Controllers
             
 
             await _projectService.InsertOrDeleteUserInProject(projectUsers, projectId, cancellationToken);
+
+            return ResponseApi.Ok().ToHttpResponse();
+
+        }
+        [HttpPost("InsertOrDeleteTagProject")]
+        public async Task<IActionResult> InsertOrDeleteTagProject([FromBody] List<TagProjectDtos> tagProjectDtos, [FromQuery] int projectId, CancellationToken cancellationToken)
+        {
+
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+
+
+            await _projectService.InsertOrDeleteTagInProject(tagProjectDtos, projectId, cancellationToken);
 
             return ResponseApi.Ok().ToHttpResponse();
 

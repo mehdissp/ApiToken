@@ -1,5 +1,6 @@
 ﻿using JWTApi.Application.DTOs.MenuAccess;
 using JWTApi.Application.DTOs.ProjectUsers;
+using JWTApi.Application.DTOs.TagProjects;
 using JWTApi.Domain.Dtos;
 using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
@@ -54,6 +55,28 @@ namespace JWTApi.Application.Services
                 }).ToList();
 
                 await _projectRepository.InsertOrDeleteUserInProject(projectUser, cancellationToken);
+                await _unit.SaveChanges(cancellationToken);
+            }
+
+
+        }
+
+
+        public async Task InsertOrDeleteTagInProject(List<TagProjectDtos> tagProjectDtos, int projectId, CancellationToken cancellationToken)
+        {
+            if (tagProjectDtos == null || !tagProjectDtos.Any())
+            {
+                await _projectRepository.DeleteTagProject(projectId, cancellationToken);
+            }
+            else
+            {
+                var tagproject = tagProjectDtos.Select(pu => new TagProject
+                {
+                    ProjectId = projectId,
+                    TagId = pu.TagId // یا TagId اگر پراپرتی نامش متفاوت است
+                }).ToList();
+
+                await _projectRepository.InsertOrDeleteTagInProject(tagproject, cancellationToken);
                 await _unit.SaveChanges(cancellationToken);
             }
 

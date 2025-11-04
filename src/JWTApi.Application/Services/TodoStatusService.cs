@@ -38,9 +38,9 @@ namespace JWTApi.Application.Services
             await _unit.SaveChanges(cancellationToken);
         }
 
-        public async Task<List<Tag>> GetTagsAsync(CancellationToken cancellationToken)
+        public async Task<List<Tag>> GetTagsAsync(int projectId,CancellationToken cancellationToken)
         {
-            return await _todoStatus.GetTags(cancellationToken);
+            return await _todoStatus.GetTags(projectId,cancellationToken);
         }
     }
 }
