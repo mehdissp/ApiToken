@@ -75,11 +75,13 @@ namespace JWTApi.API.Controllers
     {
         // گرفتن UserId از Claim توکن
         var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var roleName = User.Claims.FirstOrDefault(c => c.Type == "roleName")?.Value;
             var test = User.Claims;
         if (userId == null)
             return Unauthorized();
 
         var user = await _authService.GetUserProfile(userId, cancellationToken);
+            user.RoleName = roleName;
         if (user == null)
            return NotFound();
 

@@ -18,7 +18,8 @@ namespace JWTApi.Application.Services
             _todoStatus = todoStatus;
             _unit = unit;
         }
-        public async Task<List<TodoStatusDtos>> GetTodoStatusesAsync(int projectId,string roleId, CancellationToken cancellationToken)
+        public async Task<(List<TodoStatusDtos> todoStatuses, bool checkDeleteTodoStatus, bool checkEditTodoStatus, bool checkInsertTodoStatus, bool checkViewTodoStatus)>
+    GetTodoStatus(int projectId, string roleId, CancellationToken cancellationToken)
         {
             return await _todoStatus.GetTodoStatus(projectId, roleId, cancellationToken);
         }

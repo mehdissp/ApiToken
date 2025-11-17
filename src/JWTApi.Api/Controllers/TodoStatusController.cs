@@ -30,10 +30,17 @@ namespace JWTApi.Api.Controllers
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             var roleId = User.Claims.FirstOrDefault(c => c.Type == "roleId")?.Value;
-            var result = await _todoStatus.GetTodoStatusesAsync(projectId, roleId, cancellationToken);
+            var (result, deletePerm, editPerm, insertPerm, viewPerm) = await _todoStatus.GetTodoStatus(projectId, roleId, cancellationToken);
             var todo = await _todo.TodoWithTagsViewsAsync(userId, roleId, cancellationToken);
             var results = new
             {
+                Access = new
+                {
+                    deleteTodoStatus = deletePerm,
+                    editTodoStatus = editPerm,
+                    insertTodoStatus = insertPerm,
+                    viewTodoStatus = viewPerm,
+                },
                 Columns = result.Select(s => new
                 {
                     Id = s.Id,
@@ -67,6 +74,7 @@ namespace JWTApi.Api.Controllers
 
                     })
                 }).OrderBy(c => c.OrderNum)
+              
             };
 
 

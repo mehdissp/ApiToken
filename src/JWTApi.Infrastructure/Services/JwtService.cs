@@ -72,7 +72,7 @@ namespace JWTApi.Infrastructure.Services
             {
                /* claims.Add(new Claim(ClaimTypes.Role, firstRole.Role.Name))*/;
                 claims.Add(new Claim("roleId", firstRole.RoleId.ToString()));
-                //claims.Add(new Claim("roleName", firstRole.Role.Name));
+                claims.Add(new Claim("roleName", firstRole.Role.Name));
             }
             //// اضافه کردن نقش‌ها و دسترسی‌ها
             //foreach (var role in user.UserRoles.Select(ur => ur.Role))

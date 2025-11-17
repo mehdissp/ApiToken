@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using JWTApi.Domain.Dtos;
 using JWTApi.Infrastructure.Exceptions;
 using JWTApi.Domain.Dtos.ProjectUsers;
+using System.Threading;
 
 namespace JWTApi.Infrastructure.Repositories
 {
@@ -22,7 +23,10 @@ namespace JWTApi.Infrastructure.Repositories
         }
 
         public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken)
-            => await _context.Users.Include(s=>s.UserRoles).FirstOrDefaultAsync(u => u.Username == username && u.IsActive ==true, cancellationToken);
+        {
+          return  await _context.Users.Include(u => u.UserRoles).ThenInclude(ur => ur.Role).FirstOrDefaultAsync(u => u.Username == username && u.IsActive == true, cancellationToken);
+        }
+         
         public async Task<List<string>> GetUserRolesAsync(Guid userId, CancellationToken cancellationToken)
     =>  await _context.UserRoles
             .Where(ur => ur.UserId == userId)
