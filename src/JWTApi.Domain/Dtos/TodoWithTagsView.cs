@@ -19,6 +19,9 @@ public class TodoWithTagsView
     public int? IsOverdute { get; set; }
     public bool DeleteButton { get; set; }
     public bool EditButton { get; set; }
+    public string? Avatar { get; set; }
+    public string? StatusName { get; set; }
+    public string? StatusColor { get; set; }
 
 
     public List<TagDto> Tags { get; set; } = new List<TagDto>();

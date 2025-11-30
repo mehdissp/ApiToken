@@ -11,8 +11,21 @@ namespace JWTApi.Application.DTOs
     public record UpdateNewUserDto(string UserId,string RoleId,string Username, string? Email,
         string? Password, bool IsActive, 
         string MobileNumber, string fullname,bool IsChangePassword);
-    public record GetNewUserDto(Guid Id,string Username, string Email, bool IsActive, string MobileNumber
-        ,DateTime createdAt,string fullname,string roleName ,string roleId);
+
+
+    public record GetNewUserDto
+        (Guid Id
+        ,string Username
+        ,string Email
+        ,bool IsActive
+        ,string MobileNumber
+        ,DateTime createdAt
+        ,string fullname
+        ,string roleName
+        , string avatar
+        , string roleId);
+
+
     public record LoginDto(string Username, string Password);
     public record RefreshDto(string Username, string RefreshToken);
 }

@@ -1,4 +1,5 @@
 ﻿using JWTApi.Api.Response;
+using JWTApi.Api.ViewModels;
 using JWTApi.Api.ViewModels.Project;
 using JWTApi.Api.ViewModels.Todo;
 using JWTApi.Api.ViewModels.TodoStatus;
@@ -62,6 +63,17 @@ namespace JWTApi.Api.Controllers
             var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             var roleId = User.Claims.FirstOrDefault(c => c.Type == "roleId")?.Value;
             var result = await _todoService.TodoWithTagsViewsAsync(userId, roleId, cancellationToken);
+
+            return ResponseApi.Ok(result).ToHttpResponse();
+
+        }
+
+        [HttpPost("GetTodoWithTagsViewsAsyncArchive")]
+        public async Task<IActionResult> GetTodoWithTagsViewsAsyncArchive([FromBody] PageSizeViewModel pageSize, CancellationToken cancellationToken)
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            var roleId = User.Claims.FirstOrDefault(c => c.Type == "roleId")?.Value;
+            var result = await _todoService.GetTodosWithTagsArchive((int)pageSize.Id,userId, roleId,pageSize.PageNumber,pageSize.PageSize, cancellationToken);
 
             return ResponseApi.Ok(result).ToHttpResponse();
 

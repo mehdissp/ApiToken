@@ -1,4 +1,5 @@
 ﻿using JWTApi.Application.DTOs.Todo;
+using JWTApi.Domain.Dtos;
 using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
 using System;
@@ -64,6 +65,11 @@ namespace JWTApi.Application.Services
         public async Task<List<TodoWithTagsView>> TodoWithTagsViewsAsync(string userId,string roleId, CancellationToken cancellationToken)
         {
             return await _todo.GetTodosWithTags(userId, roleId, cancellationToken);
+        }
+
+        public async Task<PagedResult<TodoWithTagsView>> GetTodosWithTagsArchive(int projectId,string userId, string roleId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        {
+            return await _todo.GetTodosWithTagsArchive(projectId,userId, roleId, pageNumber,pageSize, cancellationToken);
         }
 
         public async Task UpdateTodoWithStatusId(int id,string userId,int statusId,CancellationToken cancellation)

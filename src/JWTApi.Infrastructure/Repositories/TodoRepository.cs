@@ -1,8 +1,10 @@
-﻿using JWTApi.Domain.Dtos;
+﻿using Dapper;
+using JWTApi.Domain.Dtos;
 using JWTApi.Domain.Entities;
 using JWTApi.Domain.Interfaces;
 using JWTApi.Infrastructure.Data;
 using JWTApi.Infrastructure.Exceptions;
+using JWTApi.Infrastructure.Extentions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -65,6 +67,10 @@ namespace JWTApi.Infrastructure.Repositories
                     DeleteButton=t.UserId.ToString()== userId ?true :false,
                     EditButton = t.UserId.ToString() == userId ? true : false,
                     CountComment =_context.Comments.Where(s=>s.TodoId==t.Id && s.IsDeleted==false).Count(),
+                    Avatar = _context.Users
+                        .Where(u => u.Id.ToString() == t.UserTodo.ToString())
+                        .Select(u => u.Avatar)
+                        .First() ?? null,
 
 
                     IsOverdute = t.DueDate == null ? 0 :
@@ -81,6 +87,139 @@ namespace JWTApi.Infrastructure.Repositories
 
             return result;
         }
+
+
+        //public async Task<List<TodoWithTagsView>> GetTodosWithTagsArchive(string userId, string roleId, CancellationToken cancellationToken)
+        //{
+
+        //    // حالا کوئری اصلی
+        //    var result = await _context.Todos
+        //        .Include(t => t.TodoTags)
+        //            .ThenInclude(tt => tt.Tag)
+        //        .Where(t => (t.UserId.ToString() == userId || t.UserTodo.ToString() == userId) && t.IsDeleted == false && t.IsArchive == true)
+        //        .Select(t => new TodoWithTagsView
+        //        {
+        //            Id = t.Id,
+        //            UserNameCreator = _context.Users
+        //                .Where(u => u.Id.ToString() == t.UserId.ToString())
+        //                .Select(u => u.FullName)
+        //                .First() ?? "نامشخص",
+        //            UserNameTodo = t.UserTodo != null ?
+        //                _context.Users
+        //                    .Where(u => u.Id.ToString() == t.UserTodo.ToString())
+        //                    .Select(u => u.FullName)
+        //                    .First() ?? "نامشخص"
+        //                : null,
+        //            Title = t.Title,
+        //            Description = t.Description,
+        //            StatusId = t.StatusId,
+        //            Priority = (TodoPriority)t.Priority,
+        //            CreatedAt = t.CreatedAt,
+        //            DueDate = t.DueDate,
+        //            CompletedAt = t.CompletedAt,
+        //            UserIdTodo = t.UserTodo.ToString(),
+        //            DeleteButton = t.UserId.ToString() == userId ? true : false,
+        //            EditButton = t.UserId.ToString() == userId ? true : false,
+        //            CountComment = _context.Comments.Where(s => s.TodoId == t.Id && s.IsDeleted == false).Count(),
+        //            Avatar = _context.Users
+        //                .Where(u => u.Id.ToString() == t.UserTodo.ToString())
+        //                .Select(u => u.Avatar)
+        //                .First() ?? null,
+
+        //            IsOverdute = t.DueDate == null ? 0 :
+        //                t.DueDate <= DateTime.Now.AddDays(1) ? 1 :
+        //                t.DueDate <= DateTime.Now.AddDays(20) ? 2 : 3,
+        //            Tags = t.TodoTags.Select(tt => new TagDto
+        //            {
+        //                Id = tt.Tag.Id,
+        //                Name = tt.Tag.Name,
+        //                Color = tt.Tag.Color
+        //            }).ToList()
+        //        })
+        //        .ToListAsync(cancellationToken);
+
+        //    return result;
+        //}
+
+        public async Task<PagedResult<TodoWithTagsView>> GetTodosWithTagsArchive(int projectId, string userId, string roleId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        {
+            // محاسبه تعداد آیتم‌هایی که باید رد شوند
+            int skip = (pageNumber - 1) * pageSize;
+
+            // گرفتن کل تعداد آیتم‌ها برای محاسبه اطلاعات صفحه‌بندی
+            int totalCount = await _context.Todos
+                .Where(t => (t.UserId.ToString() == userId || t.UserTodo.ToString() == userId) && t.IsDeleted == false && t.IsArchive == true
+
+                )
+                .CountAsync(cancellationToken);
+
+            var itemsproject = await _context.TodoStatuses.Where(s => s.ProjectId == projectId).ToListAsync(cancellationToken);
+            var statusIds = itemsproject.Select(s => s.Id).ToList();
+            // حالا کوئری اصلی با صفحه‌بندی
+            var items = await _context.Todos
+                .Include(t => t.TodoTags)
+                    .ThenInclude(tt => tt.Tag)
+                .Where(t => (t.UserId.ToString() == userId || t.UserTodo.ToString() == userId) && t.IsDeleted == false && t.IsArchive == true
+                     && statusIds.Contains(t.StatusId) // فیلتر بر اساس StatusIdهای پروژه
+                )
+                .OrderByDescending(t => t.CreatedAt) // باید مرتب‌سازی مشخص شود
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(t => new TodoWithTagsView
+                {
+                    Id = t.Id,
+                    UserNameCreator = _context.Users
+                        .Where(u => u.Id.ToString() == t.UserId.ToString())
+                        .Select(u => u.FullName)
+                        .First() ?? "نامشخص",
+                    UserNameTodo = t.UserTodo != null ?
+                        _context.Users
+                            .Where(u => u.Id.ToString() == t.UserTodo.ToString())
+                            .Select(u => u.FullName)
+                            .First() ?? "نامشخص"
+                        : null,
+                    Title = t.Title,
+                    Description = t.Description,
+                    StatusId = t.StatusId,
+                    Priority = (TodoPriority)t.Priority,
+                    CreatedAt = t.CreatedAt,
+                    DueDate = t.DueDate,
+                    CompletedAt = t.CompletedAt,
+                    UserIdTodo = t.UserTodo.ToString(),
+                    DeleteButton = t.UserId.ToString() == userId ? true : false,
+                    EditButton = t.UserId.ToString() == userId ? true : false,
+                    CountComment = _context.Comments.Where(s => s.TodoId == t.Id && s.IsDeleted == false).Count(),
+                    Avatar = _context.Users
+                        .Where(u => u.Id.ToString() == t.UserTodo.ToString())
+                        .Select(u => u.Avatar)
+                        .First() ?? null,
+                    StatusName=_context.TodoStatuses.Where(s=>s.Id==t.StatusId).Select(s=>s.Name).First() ?? null,
+                    StatusColor= _context.TodoStatuses.Where(s => s.Id == t.StatusId).Select(s => s.Color).First() ?? null,
+                    IsOverdute = t.DueDate == null ? 0 :
+                        t.DueDate <= DateTime.Now.AddDays(1) ? 1 :
+                        t.DueDate <= DateTime.Now.AddDays(20) ? 2 : 3,
+                    Tags = t.TodoTags.Select(tt => new TagDto
+                    {
+                        Id = tt.Tag.Id,
+                        Name = tt.Tag.Name,
+                        Color = tt.Tag.Color
+                    }).ToList()
+                })
+                .ToListAsync(cancellationToken);
+
+            // ایجاد نتیجه صفحه‌بندی شده
+            var result = new PagedResult<TodoWithTagsView>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+
+            };
+
+            return result;
+        }
+
 
 
         public async Task DeleteAsync(int id,string userId, CancellationToken cancellationToken)
