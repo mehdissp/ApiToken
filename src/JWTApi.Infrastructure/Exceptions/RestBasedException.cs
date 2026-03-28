@@ -11,7 +11,7 @@ namespace JWTApi.Infrastructure.Exceptions
     {
         public int HttpStatus { get; set; }
 
-        public RestBasedException(string message, int httpStatus = 4440, string transactionId = "")
+        public RestBasedException(string message, int httpStatus = 403, string transactionId = "")
             : base(message, transactionId)
         {
             HttpStatus = httpStatus;

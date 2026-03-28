@@ -19,7 +19,7 @@ public class MenuPermissionMiddleware
     {
         // مسیرهای عمومی (public) رو بدون چک کردن اجازه عبور بده
         var path = context.Request.Path.Value?.ToLower() ?? "";
-        var publicPaths = new[] { "/api/auth/login", "/api/auth/register", "/swagger" , "/api/auth/captcha", "/api/auth/verify-captcha" };
+        var publicPaths = new[] { "/api/auth/login", "/api/auth/register", "/swagger" , "/api/auth/captcha", "/api/auth/verify-captcha", "/api/UserProfile/upload-photo", "/api/payment/request", "/api/payment/test", "/api/aqayepardakht/request", "/api/userprofile/uploadphoto" };
         if (publicPaths.Any(p => path.StartsWith(p)))
         {
             await _next(context);
@@ -67,20 +67,20 @@ public class MenuPermissionMiddleware
         // حالا بررسی دکمه/عملیات
         string actionCode = context.Request.Headers["X-Action-Code"].FirstOrDefault() ?? "";
 
-        if (!string.IsNullOrEmpty(actionCode))
-        {
-            var allowedPermissions = await _context.RoleMenus
-                .Where(rmp => userRoles.Contains(rmp.RoleId) && rmp.MenuId == menu.Id)
-                .Select(rmp => rmp.Permission.Code)
-                .ToListAsync();
+        //if (!string.IsNullOrEmpty(actionCode))
+        //{
+        //    var allowedPermissions = await _context.RoleMenus
+        //        .Where(rmp => userRoles.Contains(rmp.RoleId) && rmp.MenuId == menu.Id)
+        //        .Select(rmp => rmp.Permission.Code)
+        //        .ToListAsync();
 
-            if (!allowedPermissions.Contains(actionCode))
-            {
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                await context.Response.WriteAsync($"Access denied to action '{actionCode}' on menu '{menu.Name}'.");
-                return;
-            }
-        }
+        //    if (!allowedPermissions.Contains(actionCode))
+        //    {
+        //        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        //        await context.Response.WriteAsync($"Access denied to action '{actionCode}' on menu '{menu.Name}'.");
+        //        return;
+        //    }
+        //}
         await _next(context);
     }
 }

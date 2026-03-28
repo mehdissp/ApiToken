@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using JWTApi.Domain.Entities;
+using System.Reflection.Metadata;
 
 namespace JWTApi.Infrastructure.Data
 {
@@ -10,6 +11,9 @@ namespace JWTApi.Infrastructure.Data
 
         public DbSet<User> Users => Set<User>();
         public DbSet<Todo> Todos => Set<Todo>();
+        public DbSet<TodoStatus> TodoStatuses => Set<TodoStatus>();
+
+        
         public DbSet<TodoTag> TodoTags => Set<TodoTag>();
         public DbSet<Project> Projects => Set<Project>();
         public DbSet<Reminder> Reminders => Set<Reminder>();
@@ -22,9 +26,22 @@ namespace JWTApi.Infrastructure.Data
         public DbSet<RoleMenu> RoleMenus { get; set; }
         public DbSet<LoginAttempt> LoginAttempts { get; set; }
         public DbSet<IpLock> IpLocks { get; set; }
+        public DbSet<Package> Packages { get; set; }
+        public DbSet<UserPackage> UserPackages { get; set; }
+        public DbSet<ExtraProject> ExtraProjects { get; set; }
+        public DbSet<Attachment> Attachments { get; set; }
+
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<ProjectUser> ProjectUsers { get; set; }
+        public DbSet<TagProject> TagProjects { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Attachment>()
+    .HasKey(d => d.Id);
+
             modelBuilder.Entity<UserRole>().HasKey(x => new { x.UserId, x.RoleId });
             modelBuilder.Entity<RolePermission>().HasKey(x => new { x.RoleId, x.PermissionId });
             modelBuilder.Entity<LoginAttempt>(b =>
@@ -43,24 +60,38 @@ namespace JWTApi.Infrastructure.Data
                 b.Property(x => x.IPAddress).HasMaxLength(50).IsRequired();
                 b.HasIndex(x => x.IPAddress).IsUnique();
             });
+            modelBuilder.Entity<Role>(b =>
+            {
+            
+                b.Property(x => x.Name).HasMaxLength(250).IsRequired();
+              
+            });
             // ---------------- User ----------------
             modelBuilder.Entity<User>(b =>
             {
                 b.HasKey(u => u.Id);
                 b.Property(u => u.Name).HasMaxLength(100).IsRequired();
-                b.Property(u => u.Email).HasMaxLength(200).IsRequired();
+                b.Property(u => u.Email).HasMaxLength(200);
+                b.Property(u => u.FullName).HasMaxLength(200);
+                b.Property(u => u.MobileNumber).HasMaxLength(200).IsRequired();
                 b.Property(u => u.PasswordHash).IsRequired();
-                b.Property(u => u.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-
+                b.Property(u => u.CreatedAt).HasDefaultValueSql("GETDATE()");
+                b.Property(r => r.IsActive).HasDefaultValue(true);
                 b.HasMany(u => u.Todos)
                  .WithOne(t => t.User)
                  .HasForeignKey(t => t.UserId);
 
-
-
-                b.HasMany(u => u.Projects)
+                b.HasMany(u => u.ExtraProjects)
                  .WithOne(p => p.User)
                  .HasForeignKey(p => p.UserId);
+               
+                b.HasMany(p => p.UserPackages)
+               .WithOne(t => t.User)
+               .HasForeignKey(t => t.UserId);
+
+                //b.HasMany(u => u.Projects)
+                // .WithOne(p => p.User)
+                // .HasForeignKey(p => p.UserId);
 
             });
 
@@ -69,11 +100,46 @@ namespace JWTApi.Infrastructure.Data
             {
                 b.HasKey(p => p.Id);
                 b.Property(p => p.Name).HasMaxLength(200).IsRequired();
-                b.Property(p => p.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+                b.Property(p => p.CreatedAt).HasDefaultValueSql("GETDATE()");
 
-                b.HasMany(p => p.Todos)
-                 .WithOne(t => t.Project)
-                 .HasForeignKey(t => t.ProjectId);
+                //b.HasMany(p => p.Todos)
+                // .WithOne(t => t.Project)
+                // .HasForeignKey(t => t.ProjectId);
+
+                b.HasMany(p => p.TodoStatuses)
+              .WithOne(t => t.Project)
+              .HasForeignKey(t => t.ProjectId);
+
+            });
+            // ---------------- Package ----------------
+            modelBuilder.Entity<Package>(b =>
+            {
+                b.HasKey(p => p.Id);
+                b.Property(p => p.Name).HasMaxLength(200).IsRequired();
+                b.Property(s=>s.MaxProjects).IsRequired();
+                b.Property(s => s.MaxUsers).IsRequired();
+                b.Property(p => p.CreatedAt).HasDefaultValueSql("GETDATE()");
+
+                b.HasMany(p => p.UserPackages)
+                 .WithOne(t => t.Package)
+                 .HasForeignKey(t => t.PackageId);
+
+            });
+            // ---------------- UserPackage ----------------
+            modelBuilder.Entity<UserPackage>(b =>
+            {
+                b.HasKey(p => p.Id);
+                b.Property(p => p.CreatedAt).HasDefaultValueSql("GETDATE()");
+
+
+            });
+
+            // ---------------- ExtraProject ----------------
+            modelBuilder.Entity<ExtraProject>(b =>
+            {
+                b.HasKey(p => p.Id);
+                b.Property(p => p.CreatedAt).HasDefaultValueSql("GETDATE()");
+
 
             });
 
@@ -85,7 +151,27 @@ namespace JWTApi.Infrastructure.Data
                 b.Property(t => t.Description).HasMaxLength(1000);
 
 
-                b.Property(t => t.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+                b.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()");
+                b.Property(r => r.IsDeleted).HasDefaultValue(false);
+                b.Property(r => r.IsArchive).HasDefaultValue(false);
+            });
+
+            // ---------------- TodoStatus ----------------
+            modelBuilder.Entity<TodoStatus>(b =>
+            {
+                b.HasKey(t => t.Id);
+                b.Property(t => t.Name).HasMaxLength(75).IsRequired();
+                b.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()");
+
+            });
+
+            // ---------------- Comment ----------------
+            modelBuilder.Entity<Comment>(b =>
+            {
+                b.HasKey(t => t.Id);
+                b.Property(t => t.Message).HasMaxLength(1000).IsRequired();
+                b.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()");
+        
             });
 
             // ---------------- Tag ----------------
@@ -93,6 +179,8 @@ namespace JWTApi.Infrastructure.Data
             {
                 b.HasKey(tag => tag.Id);
                 b.Property(tag => tag.Name).HasMaxLength(100).IsRequired();
+                b.Property(r => r.IsDeleted).HasDefaultValue(false);
+                b.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()");
             });
 
             // ---------------- TodoTag (Many-to-Many) ----------------
@@ -111,6 +199,20 @@ namespace JWTApi.Infrastructure.Data
                  .HasForeignKey(tt => tt.TagId);
 
             });
+            //-----------------TagProject ---------------
+            modelBuilder.Entity<TagProject>(b =>
+            {
+                b.HasKey(tt => new { tt.ProjectId, tt.TagId });
+
+                b.HasOne(tt => tt.Project)
+                 .WithMany(t => t.TagProjects)
+                 .HasForeignKey(tt => tt.ProjectId);
+
+                b.HasOne(tt => tt.Tag)
+                 .WithMany(t => t.TagProjects)
+                 .HasForeignKey(tt => tt.TagId);
+
+            });
 
             // ---------------- Reminder ----------------
             modelBuilder.Entity<Reminder>(b =>
@@ -124,6 +226,26 @@ namespace JWTApi.Infrastructure.Data
                  .HasForeignKey(r => r.TodoId);
 
             });
+
+            
+                            modelBuilder.Entity<ProjectUser>(b =>
+                            {
+                                b.HasKey(rm => new { rm.UserId, rm.ProjectId });
+
+                                b.HasOne(rm => rm.user)
+                                 .WithMany(r => r.ProjectUsers)
+                                 .HasForeignKey(rm => rm.UserId);
+
+                                b.HasOne(rm => rm.project)
+                                 .WithMany(m => m.ProjectUsers)
+                                 .HasForeignKey(rm => rm.ProjectId);
+
+                                //    b.HasOne(rm => rm.Permission)
+                                //.WithMany(m => m.RoleMenus)
+                                //.HasForeignKey(rm => rm.PermissionId);
+
+
+                            });
             modelBuilder.Entity<RoleMenu>(b =>
             {
                 b.HasKey(rm => new { rm.RoleId, rm.MenuId });
@@ -136,9 +258,9 @@ namespace JWTApi.Infrastructure.Data
                  .WithMany(m => m.RoleMenus)
                  .HasForeignKey(rm => rm.MenuId);
 
-                b.HasOne(rm => rm.Permission)
-            .WithMany(m => m.RoleMenus)
-            .HasForeignKey(rm => rm.PermissionId);
+            //    b.HasOne(rm => rm.Permission)
+            //.WithMany(m => m.RoleMenus)
+            //.HasForeignKey(rm => rm.PermissionId);
 
 
             });
@@ -149,11 +271,12 @@ namespace JWTApi.Infrastructure.Data
                 b.HasKey(m => m.Id);
                 b.Property(m => m.Name).HasMaxLength(200).IsRequired();
                 b.Property(m => m.Url).HasMaxLength(500);
-
+                b.Property(t => t.IsDefault).HasDefaultValue(false);
                 b.HasOne(m => m.Parent)
                  .WithMany(p => p.Children)
                  .HasForeignKey(m => m.ParentId)
                  .OnDelete(DeleteBehavior.Restrict); // حذف منوی والد، فرزندان حذف نشوند
+
             });
         }
     }

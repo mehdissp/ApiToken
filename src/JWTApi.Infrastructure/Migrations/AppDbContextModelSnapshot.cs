@@ -22,6 +22,97 @@ namespace JWTApi.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("JWTApi.Domain.Entities.Attachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Attachments");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSeen")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("SeenAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TodoId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TodoId");
+
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.ExtraProject", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CountProject")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CountUsers")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ExtraProjects");
+                });
+
             modelBuilder.Entity("JWTApi.Domain.Entities.IpLock", b =>
                 {
                     b.Property<int>("Id")
@@ -99,10 +190,18 @@ namespace JWTApi.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Action")
+                    b.Property<string>("Icon")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Controller")
+                    b.Property<bool>("IsDefault")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool?>("IsMenu")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Label")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -113,6 +212,9 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Property<int?>("ParentId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Path")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Url")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -122,6 +224,35 @@ namespace JWTApi.Infrastructure.Migrations
                     b.HasIndex("ParentId");
 
                     b.ToTable("Menus");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.Package", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<int>("MaxProjects")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaxUsers")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Packages");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Permission", b =>
@@ -157,7 +288,10 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -169,9 +303,28 @@ namespace JWTApi.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.ProjectUser", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsCreator")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeactived")
+                        .HasColumnType("bit");
+
+                    b.HasKey("UserId", "ProjectId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectUsers");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Reminder", b =>
@@ -209,9 +362,16 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsSeen")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<short>("TypeRole")
+                        .HasColumnType("smallint");
 
                     b.HasKey("Id");
 
@@ -226,7 +386,7 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Property<int>("MenuId")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("PermissionId")
+                    b.Property<Guid?>("PermissionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("RoleId", "MenuId");
@@ -261,14 +421,51 @@ namespace JWTApi.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Color")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("DescriptionRows")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<DateTime?>("UpdateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.TagProject", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProjectId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("TagProjects");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Todo", b =>
@@ -285,7 +482,7 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
@@ -294,13 +491,23 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsArchive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<int>("Priority")
                         .HasColumnType("int");
 
                     b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
+                    b.Property<int>("StatusId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -311,6 +518,9 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("UserTodo")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
@@ -318,6 +528,49 @@ namespace JWTApi.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Todos");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.TodoStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(75)
+                        .HasColumnType("nvarchar(75)");
+
+                    b.Property<int?>("OrderNum")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TodoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("TodoId");
+
+                    b.ToTable("TodoStatuses");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.TodoTag", b =>
@@ -341,12 +594,31 @@ namespace JWTApi.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Avatar")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("MobileNumber")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -366,6 +638,15 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("TokenVersion")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -373,6 +654,37 @@ namespace JWTApi.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.UserPackage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<int>("PackageId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PackageId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserPackages");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.UserRole", b =>
@@ -390,6 +702,28 @@ namespace JWTApi.Infrastructure.Migrations
                     b.ToTable("UserRoles");
                 });
 
+            modelBuilder.Entity("JWTApi.Domain.Entities.Comment", b =>
+                {
+                    b.HasOne("JWTApi.Domain.Entities.Todo", "Todo")
+                        .WithMany()
+                        .HasForeignKey("TodoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Todo");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.ExtraProject", b =>
+                {
+                    b.HasOne("JWTApi.Domain.Entities.User", "User")
+                        .WithMany("ExtraProjects")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("JWTApi.Domain.Entities.Menu", b =>
                 {
                     b.HasOne("JWTApi.Domain.Entities.Menu", "Parent")
@@ -400,15 +734,23 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("JWTApi.Domain.Entities.Project", b =>
+            modelBuilder.Entity("JWTApi.Domain.Entities.ProjectUser", b =>
                 {
-                    b.HasOne("JWTApi.Domain.Entities.User", "User")
-                        .WithMany("Projects")
+                    b.HasOne("JWTApi.Domain.Entities.Project", "project")
+                        .WithMany("ProjectUsers")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JWTApi.Domain.Entities.User", "user")
+                        .WithMany("ProjectUsers")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("project");
+
+                    b.Navigation("user");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Reminder", b =>
@@ -430,11 +772,9 @@ namespace JWTApi.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("JWTApi.Domain.Entities.Permission", "Permission")
+                    b.HasOne("JWTApi.Domain.Entities.Permission", null)
                         .WithMany("RoleMenus")
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PermissionId");
 
                     b.HasOne("JWTApi.Domain.Entities.Role", "Role")
                         .WithMany("RoleMenus")
@@ -444,15 +784,13 @@ namespace JWTApi.Infrastructure.Migrations
 
                     b.Navigation("Menu");
 
-                    b.Navigation("Permission");
-
                     b.Navigation("Role");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.RolePermission", b =>
                 {
                     b.HasOne("JWTApi.Domain.Entities.Permission", "Permission")
-                        .WithMany("RolePermissions")
+                        .WithMany()
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -468,9 +806,28 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("JWTApi.Domain.Entities.Todo", b =>
+            modelBuilder.Entity("JWTApi.Domain.Entities.TagProject", b =>
                 {
                     b.HasOne("JWTApi.Domain.Entities.Project", "Project")
+                        .WithMany("TagProjects")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JWTApi.Domain.Entities.Tag", "Tag")
+                        .WithMany("TagProjects")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.Todo", b =>
+                {
+                    b.HasOne("JWTApi.Domain.Entities.Project", null)
                         .WithMany("Todos")
                         .HasForeignKey("ProjectId");
 
@@ -480,9 +837,22 @@ namespace JWTApi.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Project");
-
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.TodoStatus", b =>
+                {
+                    b.HasOne("JWTApi.Domain.Entities.Project", "Project")
+                        .WithMany("TodoStatuses")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JWTApi.Domain.Entities.Todo", null)
+                        .WithMany("TodoStatuses")
+                        .HasForeignKey("TodoId");
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.TodoTag", b =>
@@ -502,6 +872,25 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Navigation("Tag");
 
                     b.Navigation("Todo");
+                });
+
+            modelBuilder.Entity("JWTApi.Domain.Entities.UserPackage", b =>
+                {
+                    b.HasOne("JWTApi.Domain.Entities.Package", "Package")
+                        .WithMany("UserPackages")
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JWTApi.Domain.Entities.User", "User")
+                        .WithMany("UserPackages")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Package");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.UserRole", b =>
@@ -530,15 +919,24 @@ namespace JWTApi.Infrastructure.Migrations
                     b.Navigation("RoleMenus");
                 });
 
+            modelBuilder.Entity("JWTApi.Domain.Entities.Package", b =>
+                {
+                    b.Navigation("UserPackages");
+                });
+
             modelBuilder.Entity("JWTApi.Domain.Entities.Permission", b =>
                 {
                     b.Navigation("RoleMenus");
-
-                    b.Navigation("RolePermissions");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Project", b =>
                 {
+                    b.Navigation("ProjectUsers");
+
+                    b.Navigation("TagProjects");
+
+                    b.Navigation("TodoStatuses");
+
                     b.Navigation("Todos");
                 });
 
@@ -553,6 +951,8 @@ namespace JWTApi.Infrastructure.Migrations
 
             modelBuilder.Entity("JWTApi.Domain.Entities.Tag", b =>
                 {
+                    b.Navigation("TagProjects");
+
                     b.Navigation("TodoTags");
                 });
 
@@ -560,14 +960,20 @@ namespace JWTApi.Infrastructure.Migrations
                 {
                     b.Navigation("Reminders");
 
+                    b.Navigation("TodoStatuses");
+
                     b.Navigation("TodoTags");
                 });
 
             modelBuilder.Entity("JWTApi.Domain.Entities.User", b =>
                 {
-                    b.Navigation("Projects");
+                    b.Navigation("ExtraProjects");
+
+                    b.Navigation("ProjectUsers");
 
                     b.Navigation("Todos");
+
+                    b.Navigation("UserPackages");
 
                     b.Navigation("UserRoles");
                 });

@@ -11,9 +11,13 @@ namespace JWTApi.Domain.Entities
         public int Id { get; set; }
         public Guid UserId { get; set; }
         public string Name { get; set; } = null!;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public bool IsDeleted { get; set; } = false;
 
-        public User User { get; set; } = null!;
+        //public User User { get; set; } = null!;
         public ICollection<Todo> Todos { get; set; } = new List<Todo>();
+        public ICollection<TodoStatus> TodoStatuses { get; set; } = new List<TodoStatus>();
+        public ICollection<ProjectUser> ProjectUsers { get; set; } = new List<ProjectUser>();
+        public ICollection<TagProject> TagProjects { get; set; } = new List<TagProject>();
     }
 }

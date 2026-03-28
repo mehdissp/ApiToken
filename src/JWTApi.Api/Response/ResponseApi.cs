@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
 
 namespace JWTApi.Api.Response
 {
@@ -44,6 +45,7 @@ namespace JWTApi.Api.Response
 
     public class ErrorServiceResponse : ResponseApi
     {
+        [JsonInclude]
         public string Message { get; set; }
 
         public ErrorServiceResponse(string message, int code)

@@ -57,7 +57,7 @@ namespace JWTApi.Application.Services
            // if (user == null) return (false, null, null, null);
             if (user == null)
             {
-                await LogLoginAttempt(dto.Username, ip, false, "User not found",cancellationToken);
+               // await LogLoginAttempt(dto.Username, ip, false, "User not found",cancellationToken);
            
                 return (false, null, null, null);
             }
@@ -65,11 +65,11 @@ namespace JWTApi.Application.Services
             var result = _hasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
             if (result == PasswordVerificationResult.Failed)
             {
-                await LogLoginAttempt(dto.Username, ip, false, "Wrong password", cancellationToken);
+                //await LogLoginAttempt(dto.Username, ip, false, "Wrong password", cancellationToken);
                 return (false, null, null, null);
             }
 
-            await LogLoginAttempt(dto.Username, ip, true, "Login successful", cancellationToken );
+            //await LogLoginAttempt(dto.Username, ip, true, "Login successful", cancellationToken );
             var roles = await _userRepo.GetUserRolesAsync(user.Id, cancellationToken);
             var (token, expiry) = _jwtService.GenerateToken(user, roles);
 
@@ -119,6 +119,10 @@ namespace JWTApi.Application.Services
                 Username = user.Username,
                 Email = user.Email,
               //  ProfileImagePath = user.ProfileImagePath
+              MobileNumber=user.MobileNumber,
+              FullName=user.FullName,
+              CreatedAt=user.CreatedAt,
+              Avatar=user.Avatar
             };
         }
 
@@ -127,8 +131,11 @@ namespace JWTApi.Application.Services
             return await _userRepo.GetUserMenuPermissionsAsync(userId, cancellationToken);
         }
 
-
-
+        public async Task<List<MenuUi>> GetUserMenuPermissionsForUiAsync(string userId,string roleId, CancellationToken cancellationToken)
+        {
+            return await _userRepo.GetUserMenuPermissionsForUiAsync(userId, roleId, cancellationToken);
+        }
+        
     }
 
 
